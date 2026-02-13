@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-database"></i> My Data
+                <small class="text-muted fs-6">See what organisations know about you</small>
+            </h1>
+        </div>
+    </div>
+    
+    {% if organisations_data %}
+        <div class="row">
+            {% for org_data in organisations_data %}
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <div class="d-flex align-items-center">
+                                <span class="display-6 me-2">{{ org_data.organisation.logo }}</span>
+                                <h4 class="mb-0">{{ org_data.organisation.name }}</h4>
+                                <span class="badge bg-success ms-3">{{ org_data.total_items }} items</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% for category, items in org_data.categories.items() %}
+                                <h6 class="text-primary mt-3">
+                                    <i class="fas fa-tag"></i> {{ category|capitalize }}
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Data Field</th>
+                                                <th>Value</th>
+                                                <th>Purpose</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in items %}
+                                                <tr>
+                                                    <td>{{ item.name }}</td>
+                                                    <td><code>{{ item.value }}</code></td>
+                                                    <td><small class="text-muted">{{ item.purpose }}</small></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> You don't have any data sources yet. 
+            In a full implementation, you would connect to organisations here.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+                <small class="text-muted fs-6">Welcome, {{ user.username }}!</small>
+            </h1>
+        </div>
+    </div>
+    
+    <!-- Privacy Health Score Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="card-title">Your Privacy Health Score</h2>
+                            <p class="card-text lead">
+                                This score reflects how much control you have over your personal data.
+                                Higher is better!
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="display-1 fw-bold">{{ health_score }}</div>
+                            <span class="badge bg-light text-dark p-3 mt-2">
+                                {% if health_score >= 70 %}
+                                    <i class="fas fa-check-circle text-success"></i> Good
+                                {% elif health_score >= 40 %}
+                                    <i class="fas fa-exclamation-triangle text-warning"></i> Needs attention
+                                {% else %}
+                                    <i class="fas fa-times-circle text-danger"></i> Critical
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-3 text-primary">🏢</div>
+                    <h3 class="mt-2">{{ total_orgs }}</h3>
+                    <p class="text-muted">Connected Organisations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-3 text-primary">📊</div>
+                    <h3 class="mt-2">{{ data_items_count }}</h3>
+                    <p class="text-muted">Data Items</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-3 text-primary">✓</div>
+                    <h3 class="mt-2">{{ active_consents }}/{{ total_consents }}</h3>
+                    <p class="text-muted">Active Consents</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="{{ url_for('mydata') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-database"></i> View My Data
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{{ url_for('consents') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-check-circle"></i> Manage Consents
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendations -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Privacy Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% if active_consents < total_consents %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-success me-3">✓</span>
+                                You've already withdrawn {{ total_consents - active_consents }} consent(s). Good job!
+                            </li>
+                        {% else %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-warning me-3">!</span>
+                                <a href="{{ url_for('consents') }}">Review your active consents</a> - you can withdraw marketing permissions
+                            </li>
+                        {% endif %}
+                        
+                        {% if total_orgs > 8 %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-warning me-3">!</span>
+                                You have {{ total_orgs }} connected organisations. Consider reviewing if you need all of them.
+                            </li>
+                        {% endif %}
+                        
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="badge bg-info me-3">i</span>
+                            You can export all your data from the Settings page.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
