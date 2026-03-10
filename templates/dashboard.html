@@ -82,14 +82,19 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-4 mb-2">
                             <a href="{{ url_for('mydata') }}" class="btn btn-outline-primary w-100 py-3">
                                 <i class="fas fa-database"></i> View My Data
                             </a>
                         </div>
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-4 mb-2">
                             <a href="{{ url_for('consents') }}" class="btn btn-outline-primary w-100 py-3">
                                 <i class="fas fa-check-circle"></i> Manage Consents
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="{{ url_for('export_data') }}" class="btn btn-success w-100 py-3">
+                                <i class="fas fa-download"></i> Export My Data
                             </a>
                         </div>
                     </div>
@@ -128,7 +133,7 @@
                         
                         <li class="list-group-item d-flex align-items-center">
                             <span class="badge bg-info me-3">i</span>
-                            You can export all your data from the Settings page.
+                            <a href="{{ url_for('export_data') }}">Export your data</a> to see everything in JSON format.
                         </li>
                     </ul>
                 </div>

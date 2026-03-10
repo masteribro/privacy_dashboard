@@ -1,15 +1,15 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, Response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import db, User, Organisation, DataSource, DataItem, Consent
 from datetime import datetime
-import random
+import json
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'your-secret-key-change-this-in-production'
+app.config['SECRET_KEY'] = 'f7a9e3c1b2d5a8e4c6f1a3b9d2e5c8a17b4e6f8a2c9d1b3e5f7a8c0d2e4f6a8'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///privacy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -21,15 +21,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Create tables and sample data
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    
-    # Only add sample data if database is empty
-    if Organisation.query.count() == 0:
-        create_sample_organisations()
-        create_sample_data_for_demo_user()
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# ========== ALL FUNCTIONS DEFINED HERE ==========
 
 def create_sample_organisations():
     """Add some sample companies to the database"""
@@ -47,52 +43,6 @@ def create_sample_organisations():
     
     db.session.commit()
     print("✅ Sample organisations created!")
-
-def create_sample_data_for_demo_user():
-    """Create a demo user and sample data for testing"""
-    # Check if demo user exists
-    demo_user = User.query.filter_by(username='demo').first()
-    if not demo_user:
-        # Create demo user
-        demo_user = User(
-            username='demo',
-            email='demo@example.com',
-            password=generate_password_hash('password123')
-        )
-        db.session.add(demo_user)
-        db.session.commit()
-        
-        # Get all organisations
-        orgs = Organisation.query.all()
-        
-        # For each organisation, create a data source and sample data
-        for org in orgs:
-            # Create connection
-            data_source = DataSource(
-                user_id=demo_user.id,
-                organisation_id=org.id,
-                status='active'
-            )
-            db.session.add(data_source)
-            db.session.flush()  # Get the ID
-            
-            # Add sample data items based on organisation type
-            if 'Bank' in org.name:
-                add_banking_data(data_source.id, demo_user.id, org.id)
-            elif 'Social' in org.name:
-                add_social_data(data_source.id, demo_user.id, org.id)
-            elif 'Shop' in org.name:
-                add_shopping_data(data_source.id, demo_user.id, org.id)
-            elif 'Health' in org.name:
-                add_health_data(data_source.id, demo_user.id, org.id)
-            else:
-                add_general_data(data_source.id, demo_user.id, org.id)
-            
-            # Add consents
-            add_consents(demo_user.id, org.id)
-        
-        db.session.commit()
-        print("✅ Sample data created for demo user!")
 
 def add_banking_data(data_source_id, user_id, org_id):
     """Add sample banking data"""
@@ -175,46 +125,60 @@ def add_consents(user_id, org_id):
     for consent in consents:
         db.session.add(consent)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def create_sample_data_for_demo_user():
+    """Create a demo user and sample data for testing"""
+    # Check if demo user exists
+    demo_user = User.query.filter_by(username='demo').first()
+    if not demo_user:
+        # Create demo user
+        demo_user = User(
+            username='demo',
+            email='demo@example.com',
+            password=generate_password_hash('password123')
+        )
+        db.session.add(demo_user)
+        db.session.commit()
+        
+        # Get all organisations
+        orgs = Organisation.query.all()
+        
+        # For each organisation, create a data source and sample data
+        for org in orgs:
+            # Create connection
+            data_source = DataSource(
+                user_id=demo_user.id,
+                organisation_id=org.id,
+                status='active'
+            )
+            db.session.add(data_source)
+            db.session.flush()  # Get the ID
+            
+            # Add sample data items based on organisation type
+            if 'Bank' in org.name:
+                add_banking_data(data_source.id, demo_user.id, org.id)
+            elif 'Social' in org.name:
+                add_social_data(data_source.id, demo_user.id, org.id)
+            elif 'Shop' in org.name:
+                add_shopping_data(data_source.id, demo_user.id, org.id)
+            elif 'Health' in org.name:
+                add_health_data(data_source.id, demo_user.id, org.id)
+            else:
+                add_general_data(data_source.id, demo_user.id, org.id)
+            
+            # Add consents
+            add_consents(demo_user.id, org.id)
+        
+        db.session.commit()
+        print("✅ Sample data created for demo user!")
 
-# ---------------------- ROUTES (Pages) ----------------------
+# ========== ROUTES ==========
 
 @app.route('/')
 def index():
-    """Homepage"""
     return render_template('index.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    """User registration page"""
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        # Check if user exists
-        user = User.query.filter_by(username=username).first()
-        if user:
-            flash('Username already exists', 'danger')
-            return redirect(url_for('register'))
-        
-        # Create new user
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, email=email, password=hashed_password)
-        
-        db.session.add(new_user)
-        db.session.commit()
-        
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
-    
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])  # THIS WAS MISSING!
 def login():
-    """Login page"""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -230,10 +194,40 @@ def login():
     
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        # Check if username exists
+        username_exists = User.query.filter_by(username=username).first()
+        if username_exists:
+            flash('Username already exists', 'danger')
+            return redirect(url_for('register'))
+        
+        # Check if email exists
+        email_exists = User.query.filter_by(email=email).first()
+        if email_exists:
+            flash('Email already registered', 'danger')
+            return redirect(url_for('register'))
+        
+        # Create new user
+        hashed_password = generate_password_hash(password)
+        new_user = User(username=username, email=email, password=hashed_password)
+        
+        db.session.add(new_user)
+        db.session.commit()
+        
+        flash('Registration successful! Please login.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
+
 @app.route('/logout')
 @login_required
 def logout():
-    """Logout"""
     logout_user()
     flash('You have been logged out', 'info')
     return redirect(url_for('index'))
@@ -241,8 +235,6 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """Main dashboard - shows privacy health score and overview"""
-    
     # Get user's data
     data_sources = DataSource.query.filter_by(user_id=current_user.id, status='active').all()
     
@@ -258,19 +250,15 @@ def dashboard():
     for ds in data_sources:
         data_items_count += DataItem.query.filter_by(data_source_id=ds.id).count()
     
-    # Calculate health score (simple formula)
-    health_score = 70  # Base score
-    
-    # More consents = lower score (you gave more permission)
+    # Calculate health score
+    health_score = 70
     if total_consents > 0:
         consent_ratio = active_consents / total_consents
         health_score += int((0.5 - consent_ratio) * 20)
     
-    # More organisations = lower score (more data out there)
     if total_orgs > 5:
         health_score -= (total_orgs - 5) * 2
     
-    # Clamp between 0-100
     health_score = max(0, min(100, health_score))
     
     return render_template('dashboard.html', 
@@ -284,19 +272,14 @@ def dashboard():
 @app.route('/mydata')
 @login_required
 def mydata():
-    """View all your data across organisations"""
-    
-    # Get all data sources for current user
     data_sources = DataSource.query.filter_by(user_id=current_user.id, status='active').all()
     
-    # Organise data by organisation
     organisations_data = []
     
     for ds in data_sources:
         org = Organisation.query.get(ds.organisation_id)
         data_items = DataItem.query.filter_by(data_source_id=ds.id).all()
         
-        # Group by category
         categories = {}
         for item in data_items:
             if item.category not in categories:
@@ -305,7 +288,6 @@ def mydata():
         
         organisations_data.append({
             'organisation': org,
-            'data_source': ds,
             'categories': categories,
             'total_items': len(data_items)
         })
@@ -315,14 +297,9 @@ def mydata():
 @app.route('/consents')
 @login_required
 def consents():
-    """View and manage consents"""
-    
-    # Get all consents for current user
     all_consents = Consent.query.filter_by(user_id=current_user.id).all()
     
-    # Group by organisation
     consents_by_org = {}
-    
     for consent in all_consents:
         org = Organisation.query.get(consent.organisation_id)
         if org.name not in consents_by_org:
@@ -337,11 +314,8 @@ def consents():
 @app.route('/withdraw-consent/<int:consent_id>')
 @login_required
 def withdraw_consent(consent_id):
-    """Withdraw a consent"""
-    
     consent = Consent.query.get(consent_id)
     
-    # Check if this consent belongs to the current user
     if consent and consent.user_id == current_user.id:
         consent.status = 'withdrawn'
         consent.withdrawn_at = datetime.utcnow()
@@ -352,9 +326,39 @@ def withdraw_consent(consent_id):
     
     return redirect(url_for('consents'))
 
+@app.route('/export-data')
+@login_required
+def export_data():
+    data_sources = DataSource.query.filter_by(user_id=current_user.id).all()
+    
+    export_data = {
+        'user': current_user.username,
+        'email': current_user.email,
+        'created_at': str(current_user.created_at),
+        'export_date': str(datetime.now()),
+        'organisations': []
+    }
+    
+    for ds in data_sources:
+        org = Organisation.query.get(ds.organisation_id)
+        items = DataItem.query.filter_by(data_source_id=ds.id).all()
+        
+        org_data = {
+            'name': org.name,
+            'connected_since': str(ds.connected_at),
+            'data_items': [{'category': i.category, 'name': i.name, 'value': i.value, 'purpose': i.purpose} 
+                          for i in items]
+        }
+        export_data['organisations'].append(org_data)
+    
+    return Response(
+        json.dumps(export_data, indent=2),
+        mimetype='application/json',
+        headers={'Content-Disposition': 'attachment;filename=my-privacy-data.json'}
+    )
+
 @app.route('/quick-demo')
 def quick_demo():
-    """Quick login as demo user for testing"""
     demo_user = User.query.filter_by(username='demo').first()
     if demo_user:
         login_user(demo_user)
@@ -364,6 +368,17 @@ def quick_demo():
         flash('Demo user not found. Please check database.', 'danger')
         return redirect(url_for('index'))
 
-# Run the app
+# ========== DATABASE INITIALIZATION (NOW AT THE BOTTOM - AFTER ALL FUNCTIONS) ==========
+
+with app.app_context():
+    db.create_all()
+    
+    # Only add sample data if database is empty
+    if Organisation.query.count() == 0:
+        create_sample_organisations()
+        create_sample_data_for_demo_user()
+
+# ========== RUN THE APP ==========
+
 if __name__ == '__main__':
     app.run(debug=True)
