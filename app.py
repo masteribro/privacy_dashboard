@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, Response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import db, User, Organisation, DataSource, DataItem, Consent
+from database import db, User, Organisation, DataSource, DataItem, Consent, CCPAOptOut, SubjectAccessRequest, AuditLog, UserPreference
 from datetime import datetime
 import json
 
@@ -292,7 +292,15 @@ def mydata():
             'total_items': len(data_items)
         })
     
+    log_audit("view_mydata", "user", current_user.id, "Viewed personal data")
     return render_template('mydata.html', organisations_data=organisations_data)
+
+@app.route('/data-flow')
+@login_required
+def data_flow():
+    """Data flow visualization showing how data moves through the ecosystem"""
+    log_audit("view_data_flow", "user", current_user.id, "Viewed data flow visualization")
+    return render_template('data_flow.html')
 
 @app.route('/consents')
 @login_required
@@ -351,6 +359,8 @@ def export_data():
         }
         export_data['organisations'].append(org_data)
     
+    log_audit("export_data", "user", current_user.id, "Exported full privacy data")
+    
     return Response(
         json.dumps(export_data, indent=2),
         mimetype='application/json',
@@ -367,6 +377,202 @@ def quick_demo():
     else:
         flash('Demo user not found. Please check database.', 'danger')
         return redirect(url_for('index'))
+
+# ========== AUDIT LOGGING UTILITY ==========
+
+def log_audit(action, resource_type, resource_id=None, details="", status="success"):
+    """Log user actions for compliance and security"""
+    try:
+        ip_address = request.remote_addr if request else None
+        audit_log = AuditLog(
+            user_id=current_user.id if current_user.is_authenticated else None,
+            action=action,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            details=details,
+            ip_address=ip_address,
+            status=status
+        )
+        db.session.add(audit_log)
+        db.session.commit()
+    except Exception as e:
+        print(f"[AUDIT LOG ERROR] {e}")
+
+# ========== DATA REQUEST ROUTES (GDPR Article 15 - SAR) ==========
+
+@app.route('/data-requests')
+@login_required
+def data_requests():
+    """View all Subject Access Requests"""
+    requests = SubjectAccessRequest.query.filter_by(user_id=current_user.id).order_by(SubjectAccessRequest.request_date.desc()).all()
+    log_audit("view_data_requests", "request", details="Viewed SAR list")
+    return render_template('data_requests.html', requests=requests)
+
+@app.route('/request-data', methods=['GET', 'POST'])
+@login_required
+def request_data():
+    """File a new Subject Access Request"""
+    if request.method == 'POST':
+        description = request.form.get('description')
+        data_format = request.form.get('format', 'json')
+        
+        sar = SubjectAccessRequest(
+            user_id=current_user.id,
+            description=description,
+            data_format=data_format,
+            status='completed'  # auto-complete for demo
+        )
+        db.session.add(sar)
+        db.session.commit()
+        
+        log_audit("create_sar", "request", sar.id, f"Format: {data_format}")
+        flash('Data request submitted successfully!', 'success')
+        return redirect(url_for('data_requests'))
+    
+    return render_template('request_data.html')
+
+@app.route('/download-sar/<int:request_id>')
+@login_required
+def download_sar(request_id):
+    """Download Subject Access Request data"""
+    sar = SubjectAccessRequest.query.get(request_id)
+    
+    if not sar or sar.user_id != current_user.id:
+        flash('Request not found', 'danger')
+        return redirect(url_for('data_requests'))
+    
+    if sar.status != 'completed':
+        flash('Request not yet completed', 'warning')
+        return redirect(url_for('data_requests'))
+    
+    # Generate data export (reuse export-data logic)
+    data_sources = DataSource.query.filter_by(user_id=current_user.id).all()
+    
+    export_data = {
+        'type': 'Subject Access Request',
+        'sar_id': sar.id,
+        'user': current_user.username,
+        'email': current_user.email,
+        'request_date': str(sar.request_date),
+        'download_date': str(datetime.now()),
+        'organisations': []
+    }
+    
+    for ds in data_sources:
+        org = Organisation.query.get(ds.organisation_id)
+        items = DataItem.query.filter_by(data_source_id=ds.id).all()
+        
+        org_data = {
+            'name': org.name,
+            'connected_since': str(ds.connected_at),
+            'data_items': [{'category': i.category, 'name': i.name, 'value': i.value, 'purpose': i.purpose} 
+                          for i in items]
+        }
+        export_data['organisations'].append(org_data)
+    
+    log_audit("download_sar", "request", request_id, "Downloaded SAR data")
+    
+    return Response(
+        json.dumps(export_data, indent=2),
+        mimetype='application/json',
+        headers={'Content-Disposition': f'attachment;filename=sar-{request_id}.json'}
+    )
+
+# ========== CCPA ROUTES ==========
+
+@app.route('/ccpa-settings')
+@login_required
+def ccpa_settings():
+    """CCPA Privacy Settings (California residents)"""
+    opt_outs = CCPAOptOut.query.filter_by(user_id=current_user.id).all()
+    opt_out_types = {opt.opt_out_type for opt in opt_outs}
+    
+    log_audit("view_ccpa_settings", "ccpa", details="Viewed CCPA settings")
+    
+    return render_template('ccpa_settings.html', 
+                         opt_out_types=opt_out_types,
+                         all_opt_outs=opt_outs)
+
+@app.route('/ccpa-opt-out/<opt_type>', methods=['POST'])
+@login_required
+def ccpa_opt_out(opt_type):
+    """Opt out from data sales or sharing (CCPA)"""
+    valid_types = ['sale', 'sharing', 'targeted_advertising']
+    
+    if opt_type not in valid_types:
+        return {'status': 'error', 'message': 'Invalid opt-out type'}, 400
+    
+    org_id = request.form.get('organisation_id')
+    reason = request.form.get('reason', '')
+    
+    # Check if already opted out
+    existing = CCPAOptOut.query.filter_by(
+        user_id=current_user.id,
+        organisation_id=org_id,
+        opt_out_type=opt_type
+    ).first()
+    
+    if not existing:
+        opt_out = CCPAOptOut(
+            user_id=current_user.id,
+            organisation_id=org_id,
+            opt_out_type=opt_type,
+            reason=reason
+        )
+        db.session.add(opt_out)
+        db.session.commit()
+        
+        log_audit("ccpa_opt_out", "ccpa", org_id, f"Type: {opt_type}")
+        flash(f'Successfully opted out from {opt_type}', 'success')
+    else:
+        flash('Already opted out from this', 'info')
+    
+    return redirect(url_for('ccpa_settings'))
+
+@app.route('/ccpa-opt-in/<int:opt_out_id>', methods=['POST'])
+@login_required
+def ccpa_opt_in(opt_out_id):
+    """Revoke CCPA opt-out and opt back in"""
+    opt_out = CCPAOptOut.query.get(opt_out_id)
+    
+    if opt_out and opt_out.user_id == current_user.id:
+        log_audit("ccpa_opt_in", "ccpa", opt_out.organisation_id, f"Type: {opt_out.opt_out_type}")
+        db.session.delete(opt_out)
+        db.session.commit()
+        flash('You have opted back in', 'success')
+    else:
+        flash('Opt-out record not found', 'danger')
+    
+    return redirect(url_for('ccpa_settings'))
+
+# ========== AUDIT LOG ROUTES ==========
+
+@app.route('/audit-logs')
+@login_required
+def audit_logs():
+    """View audit logs of all user actions"""
+    logs = AuditLog.query.filter_by(user_id=current_user.id).order_by(AuditLog.timestamp.desc()).limit(100).all()
+    
+    log_audit("view_audit_logs", "audit", details="Viewed audit logs")
+    
+    return render_template('audit_logs.html', logs=logs)
+
+# ========== LEGAL PAGES ==========
+
+@app.route('/privacy-policy')
+def privacy_policy():
+    """Privacy Policy page"""
+    return render_template('privacy_policy.html')
+
+@app.route('/terms-of-service')
+def terms_of_service():
+    """Terms of Service page"""
+    return render_template('terms_of_service.html')
+
+@app.route('/data-processing')
+def data_processing():
+    """Data Processing Information page"""
+    return render_template('data_processing.html')
 
 # ========== DATABASE INITIALIZATION (NOW AT THE BOTTOM - AFTER ALL FUNCTIONS) ==========
 

@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="d-flex align-items-center mb-4">
+                <h1>CCPA Privacy Settings</h1>
+                <span class="badge bg-warning text-dark ms-3">California Residents</span>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                <strong>California Consumer Privacy Act (CCPA):</strong> 
+                These settings allow you to exercise your CCPA rights to opt out of data sales, sharing, and targeted advertising.
+            </div>
+
+            <!-- Tabs for different opt-out types -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="optout-tab" data-bs-toggle="tab" data-bs-target="#optout-content" type="button">
+                        <i class="fas fa-ban"></i> Opt-Outs
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rights-tab" data-bs-toggle="tab" data-bs-target="#rights-content" type="button">
+                        <i class="fas fa-shield-alt"></i> Your Rights
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Opt-Outs Tab -->
+                <div class="tab-pane fade show active" id="optout-content" role="tabpanel">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Opt-out of Data Sales -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0"><i class="fas fa-dollar-sign"></i> Opt-Out of Data Sales</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Under CCPA, you have the right to opt out of the sale of your personal information.</p>
+                                    <p class="mb-3"><strong>Current Status:</strong> 
+                                        {% if 'sale' in opt_out_types %}
+                                            <span class="badge bg-success">Opted Out</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Opted Out</span>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if 'sale' not in opt_out_types %}
+                                        <form method="POST" action="{{ url_for('ccpa_opt_out', opt_type='sale') }}">
+                                            <div class="mb-3">
+                                                <label for="sale_org" class="form-label">Select Organization:</label>
+                                                <select class="form-select" id="sale_org" name="organisation_id" required>
+                                                    <option value="">-- Choose an organization --</option>
+                                                    {% for opt_out in all_opt_outs %}
+                                                        {% if opt_out.opt_out_type == 'sale' %}
+                                                            <option value="{{ opt_out.organisation_id }}" disabled>{{ opt_out.organisation_id }} (Already opted out)</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    <optgroup label="Available Organizations">
+                                                        <option value="1">SimulatedBank</option>
+                                                        <option value="2">SimulatedSocial</option>
+                                                        <option value="3">SimulatedShop</option>
+                                                        <option value="4">SimulatedHealth</option>
+                                                        <option value="5">SimulatedEmail</option>
+                                                        <option value="6">SimulatedStream</option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="sale_reason" class="form-label">Reason (optional):</label>
+                                                <textarea class="form-control" id="sale_reason" name="reason" rows="2" placeholder="Why are you opting out?"></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-ban"></i> Opt Out of Sales
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle"></i> You have opted out of data sales.
+                                        </div>
+                                        <p>To revoke this opt-out:</p>
+                                        {% for opt_out in all_opt_outs %}
+                                            {% if opt_out.opt_out_type == 'sale' %}
+                                                <form method="POST" action="{{ url_for('ccpa_opt_in', opt_out_id=opt_out.id) }}" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-check"></i> Opt Back In
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Opt-out of Data Sharing -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="fas fa-share-alt"></i> Opt-Out of Data Sharing</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>You can opt out of the sharing of your personal information with service providers and contractors.</p>
+                                    <p class="mb-3"><strong>Current Status:</strong> 
+                                        {% if 'sharing' in opt_out_types %}
+                                            <span class="badge bg-success">Opted Out</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Opted Out</span>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if 'sharing' not in opt_out_types %}
+                                        <form method="POST" action="{{ url_for('ccpa_opt_out', opt_type='sharing') }}">
+                                            <div class="mb-3">
+                                                <label for="sharing_org" class="form-label">Select Organization:</label>
+                                                <select class="form-select" id="sharing_org" name="organisation_id" required>
+                                                    <option value="">-- Choose an organization --</option>
+                                                    <optgroup label="Available Organizations">
+                                                        <option value="1">SimulatedBank</option>
+                                                        <option value="2">SimulatedSocial</option>
+                                                        <option value="3">SimulatedShop</option>
+                                                        <option value="4">SimulatedHealth</option>
+                                                        <option value="5">SimulatedEmail</option>
+                                                        <option value="6">SimulatedStream</option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="fas fa-ban"></i> Opt Out of Sharing
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle"></i> You have opted out of data sharing.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Opt-out of Targeted Advertising -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-bullseye"></i> Opt-Out of Targeted Advertising</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>You can limit the use of your personal information for targeted advertising purposes.</p>
+                                    <p class="mb-3"><strong>Current Status:</strong> 
+                                        {% if 'targeted_advertising' in opt_out_types %}
+                                            <span class="badge bg-success">Opted Out</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Opted Out</span>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if 'targeted_advertising' not in opt_out_types %}
+                                        <form method="POST" action="{{ url_for('ccpa_opt_out', opt_type='targeted_advertising') }}">
+                                            <div class="mb-3">
+                                                <label for="ad_org" class="form-label">Select Organization:</label>
+                                                <select class="form-select" id="ad_org" name="organisation_id" required>
+                                                    <option value="">-- Choose an organization --</option>
+                                                    <optgroup label="Available Organizations">
+                                                        <option value="1">SimulatedBank</option>
+                                                        <option value="2">SimulatedSocial</option>
+                                                        <option value="3">SimulatedShop</option>
+                                                        <option value="4">SimulatedHealth</option>
+                                                        <option value="5">SimulatedEmail</option>
+                                                        <option value="6">SimulatedStream</option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-info text-white">
+                                                <i class="fas fa-ban"></i> Opt Out of Targeted Ads
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle"></i> You have opted out of targeted advertising.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar: Summary -->
+                        <div class="col-lg-4">
+                            <div class="card bg-light sticky-top" style="top: 20px;">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Your Opt-Out Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h6><i class="fas fa-dollar-sign text-danger"></i> Data Sales</h6>
+                                        <p class="mb-0">
+                                            {% if 'sale' in opt_out_types %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Not Set</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <h6><i class="fas fa-share-alt text-warning"></i> Data Sharing</h6>
+                                        <p class="mb-0">
+                                            {% if 'sharing' in opt_out_types %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Not Set</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <h6><i class="fas fa-bullseye text-info"></i> Targeted Ads</h6>
+                                        <p class="mb-0">
+                                            {% if 'targeted_advertising' in opt_out_types %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Not Set</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <hr>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Your CCPA preferences are stored securely and transmitted to organisations upon request.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rights Tab -->
+                <div class="tab-pane fade" id="rights-content" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-shield-alt"></i> Your CCPA Rights</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <strong><i class="fas fa-eye text-primary"></i> Right to Know:</strong>
+                                    You can request what personal data organisations collect, use, and share about you.
+                                    <a href="{{ url_for('request_data') }}" class="btn btn-sm btn-outline-primary ms-2">Submit Request</a>
+                                </li>
+                                <li class="mb-3">
+                                    <strong><i class="fas fa-trash text-danger"></i> Right to Delete:</strong>
+                                    You can request deletion of personal data collected about you (with some exceptions).
+                                </li>
+                                <li class="mb-3">
+                                    <strong><i class="fas fa-ban text-warning"></i> Right to Opt-Out:</strong>
+                                    You can opt out of the sale or sharing of your personal data. Use the forms above to exercise this right.
+                                </li>
+                                <li class="mb-3">
+                                    <strong><i class="fas fa-edit text-info"></i> Right to Correct:</strong>
+                                    You can request correction of inaccurate personal data held about you.
+                                </li>
+                                <li class="mb-3">
+                                    <strong><i class="fas fa-equals text-success"></i> Right to Non-Discrimination:</strong>
+                                    Organisations cannot discriminate against you for exercising your CCPA rights.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <small>
+                    <i class="fas fa-info-circle"></i> 
+                    For more information about CCPA, visit <strong>ccpa-info.ca.gov</strong> or 
+                    <a href="{{ url_for('data_processing') }}">our Data Processing page</a>.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

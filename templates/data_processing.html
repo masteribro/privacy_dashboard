@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4">Data Processing & Legal Information</h1>
+            
+            <div class="content-section">
+                <h3>1. Data Controller and Processor Information</h3>
+                <p><strong>PrivacyFirst Dashboard</strong> acts as a Data Controller for data collected directly through our platform.</p>
+                <ul>
+                    <li><strong>Controller Name:</strong> PrivacyFirst Dashboard</li>
+                    <li><strong>Contact:</strong> dpo@privacyfirst.demo</li>
+                    <li><strong>Data Protection Officer:</strong> privacy@privacyfirst.demo</li>
+                    <li><strong>Registered Address:</strong> Demo Privacy Operations Center, Demo Country</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>2. Processing Activities</h3>
+                <p>PrivacyFirst processes the following categories of personal data:</p>
+                <ul>
+                    <li><strong>Account Information:</strong> Username, email, encrypted password</li>
+                    <li><strong>Connected Data Metadata:</strong> Organisation names, data source types, connection timestamps</li>
+                    <li><strong>Data Items:</strong> Categories, names, purposes of your personal data</li>
+                    <li><strong>Consent Records:</strong> Consent status, granted/withdrawn dates</li>
+                    <li><strong>Activity Logs:</strong> User actions, IP addresses, timestamps</li>
+                    <li><strong>Preferences:</strong> Language, theme, notification settings</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>3. Legal Basis for Processing (GDPR)</h3>
+                <p>Under the General Data Protection Regulation (GDPR), we process personal data on the following legal bases:</p>
+                <ul>
+                    <li><strong>Legitimate Interest (Article 6(1)(f)):</strong> For security, fraud detection, and service improvement</li>
+                    <li><strong>Consent (Article 6(1)(a)):</strong> For newsletter subscriptions and additional analytics</li>
+                    <li><strong>Legal Obligation (Article 6(1)(c)):</strong> For compliance with privacy laws and regulations</li>
+                    <li><strong>Contract (Article 6(1)(b)):</strong> To provide the PrivacyFirst Dashboard service</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>4. Automated Decision Making and Profiling</h3>
+                <p>PrivacyFirst uses automated decision-making for:</p>
+                <ul>
+                    <li><strong>Privacy Health Score Calculation:</strong> A non-binding score calculated from your consent status and data holdings</li>
+                    <li><strong>Anomaly Detection:</strong> Automatic flagging of unusual account activities for security</li>
+                </ul>
+                <p>You have the right to request human review of any automated decisions affecting you.</p>
+            </div>
+
+            <div class="content-section">
+                <h3>5. Data Recipients</h3>
+                <p>Your personal data is shared with the following recipients:</p>
+                <ul>
+                    <li><strong>Internal Staff:</strong> Only Privacy and Data Protection team members can access user data for support</li>
+                    <li><strong>Service Providers:</strong> Cloud hosting providers with Data Processing Agreements in place</li>
+                    <li><strong>Legal Authorities:</strong> If required by law enforcement or court order</li>
+                    <li><strong>NOT SHARED:</strong> Marketing companies, data brokers, or third-party advertisers</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>6. International Data Transfers</h3>
+                <p>PrivacyFirst Dashboard stores data within the European Economic Area (EEA). If you access from outside the EEA, data may be transferred to the EEA. Transfers are conducted in compliance with GDPR Chapter V safeguards.</p>
+            </div>
+
+            <div class="content-section">
+                <h3>7. Data Retention Periods</h3>
+                <p>We retain your personal data for the following periods:</p>
+                <ul>
+                    <li><strong>Account Data:</strong> For the duration of your account + 30 days after deletion</li>
+                    <li><strong>Audit Logs:</strong> 7 years for compliance and investigation purposes</li>
+                    <li><strong>Subject Access Requests:</strong> 3 years from request date</li>
+                    <li><strong>CCPA Opt-out Records:</strong> Retained as required by CCPA (minimum 12 months)</li>
+                    <li><strong>Activity Logs:</strong> Last 100 entries visible; older logs archived for 2 years</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>8. Your Data Protection Rights</h3>
+                <p>Under GDPR and CCPA, you have the following rights:</p>
+                <ul>
+                    <li><strong>Right of Access (GDPR 15, CCPA):</strong> Request a copy of your data via Subject Access Request</li>
+                    <li><strong>Right to Rectification (GDPR 16):</strong> Correct inaccurate data</li>
+                    <li><strong>Right to Erasure (GDPR 17, CCPA):</strong> Request deletion of your data</li>
+                    <li><strong>Right to Restriction (GDPR 18):</strong> Limit processing of your data</li>
+                    <li><strong>Right to Data Portability (GDPR 20, CCPA):</strong> Download your data in structured format</li>
+                    <li><strong>Right to Object (GDPR 21):</strong> Object to certain processing activities</li>
+                    <li><strong>Right to Withdraw Consent (GDPR 7, CCPA):</strong> Withdraw consents and opt out</li>
+                    <li><strong>Right to Non-Discrimination (CCPA):</strong> We do not discriminate for exercising rights</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>9. How to Exercise Your Rights</h3>
+                <p>To exercise any of your data protection rights:</p>
+                <ul>
+                    <li><strong>Subject Access Request:</strong> Use the "Request Data" feature in your account</li>
+                    <li><strong>Opt-out (CCPA):</strong> Use the "CCPA Settings" page to opt out of data sales or sharing</li>
+                    <li><strong>Withdraw Consent:</strong> Use the "Consents" page to manage your consents</li>
+                    <li><strong>Other Requests:</strong> Email dpo@privacyfirst.demo with your request</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>10. Data Security Measures</h3>
+                <p>PrivacyFirst implements the following security measures:</p>
+                <ul>
+                    <li>End-to-end encryption for data in transit (SSL/TLS)</li>
+                    <li>Encryption of sensitive data at rest (AES-256)</li>
+                    <li>Secure password hashing (bcrypt)</li>
+                    <li>Regular security audits and penetration testing</li>
+                    <li>Comprehensive access controls and audit logging</li>
+                    <li>Incident response procedures with 72-hour breach notification</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>11. Data Breach Notification</h3>
+                <p>In the event of a data breach affecting your personal data, we will:</p>
+                <ul>
+                    <li>Notify you within 72 hours as required by GDPR</li>
+                    <li>Provide details of the breach and affected data</li>
+                    <li>Explain measures taken to secure your data</li>
+                    <li>Provide contact information for questions</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>12. Third-Party Links</h3>
+                <p>The PrivacyFirst Dashboard may contain links to third-party websites. We are not responsible for their privacy practices. Please review their privacy policies before providing personal data.</p>
+            </div>
+
+            <div class="content-section">
+                <h3>13. Data Protection Authority</h3>
+                <p>If you believe your data protection rights have been violated, you have the right to lodge a complaint with your local Data Protection Authority:</p>
+                <ul>
+                    <li><strong>EU/EEA:</strong> Your national Data Protection Authority</li>
+                    <li><strong>UK:</strong> Information Commissioner's Office (ICO) - ico.org.uk</li>
+                    <li><strong>California:</strong> California Privacy Protection Agency (CPPA)</li>
+                </ul>
+            </div>
+
+            <div class="content-section">
+                <h3>14. Contact Our Data Protection Officer</h3>
+                <p>For any questions about how we process your data:</p>
+                <ul>
+                    <li><strong>Email:</strong> dpo@privacyfirst.demo</li>
+                    <li><strong>Postal Address:</strong> Privacy Operations, PrivacyFirst, Demo Country</li>
+                    <li><strong>Response Time:</strong> We respond to all inquiries within 14 days</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <small><strong>Last Updated:</strong> March 2026</small>
+                <br><small><strong>Version:</strong> 2.0 - Includes CCPA and SAR procedures</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

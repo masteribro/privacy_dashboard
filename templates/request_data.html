@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="mb-4">Request Your Data (SAR)</h1>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-export"></i> Subject Access Request Form</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>GDPR Article 15 Right:</strong>
+                        You have the right to obtain a copy of all personal data we hold about you. This form allows you to submit your request.
+                    </div>
+
+                    <form method="POST" action="{{ url_for('request_data') }}">
+                        <div class="mb-4">
+                            <h6>Request Details</h6>
+                            <p class="text-muted">Please provide a brief description of your data access request.</p>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Request Description <span class="text-danger">*</span></label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="description" 
+                                    name="description" 
+                                    rows="4" 
+                                    required
+                                    placeholder="E.g., I request a copy of all personal data you hold about me related to my account..."
+                                ></textarea>
+                                <small class="form-text text-muted">
+                                    Be as specific as possible about what data you're requesting.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6>Preferred Format</h6>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format" id="format-json" value="json" checked>
+                                    <label class="form-check-label" for="format-json">
+                                        <strong>JSON</strong>
+                                        <small class="d-block text-muted">Structured data format, can be imported into other systems</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format" id="format-csv" value="csv">
+                                    <label class="form-check-label" for="format-csv">
+                                        <strong>CSV</strong>
+                                        <small class="d-block text-muted">Spreadsheet format, compatible with Excel and Google Sheets</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6>Data Included</h6>
+                            <p class="text-muted">Your export will include:</p>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <i class="fas fa-user"></i> Account information (username, email, creation date)
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-database"></i> All connected data sources and items
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check-circle"></i> Consent records and history
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-cog"></i> Your preferences and settings
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirm" name="confirm" required>
+                                <label class="form-check-label" for="confirm">
+                                    I confirm that I am requesting this data for myself and understand the information will contain personal data.
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                            <a href="{{ url_for('data_requests') }}" class="btn btn-outline-secondary">
+                                View Existing Requests
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>How long does it take?</h6>
+                        <p>We typically process requests within 30 days. Complex requests may take up to 90 days.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Is there a cost?</h6>
+                        <p>No, requests are free. We may charge for additional copies if you request them.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>What if I don't get a response?</h6>
+                        <p>If we don't respond within the timeframe, you can lodge a complaint with your local Data Protection Authority.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Can I get the data in another format?</h6>
+                        <p>Yes, you can request JSON, CSV, or other portable formats. Let us know your preference above.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <small>
+                    <i class="fas fa-info-circle"></i>
+                    For more details about your rights, see our <a href="{{ url_for('data_processing') }}">Data Processing Information</a>.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
