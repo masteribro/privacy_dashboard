@@ -485,6 +485,8 @@ def mydata():
     data_sources = DataSource.query.filter_by(user_id=current_user.id, status='active').all()
     
     organisations_data = []
+    sensitive_categories = {'health', 'financial', 'location'}
+    sensitive_count = 0
     
     for ds in data_sources:
         org = Organisation.query.get(ds.organisation_id)
@@ -495,6 +497,9 @@ def mydata():
             if item.category not in categories:
                 categories[item.category] = []
             categories[item.category].append(item)
+            # Count sensitive data items
+            if item.category in sensitive_categories:
+                sensitive_count += 1
         
         organisations_data.append({
             'organisation': org,
@@ -503,7 +508,7 @@ def mydata():
         })
     
     log_audit("view_mydata", "user", current_user.id, "Viewed personal data")
-    return render_template('mydata.html', organisations_data=organisations_data)
+    return render_template('mydata.html', organisations_data=organisations_data, sensitive_count=sensitive_count)
 
 @app.route('/data-flow')
 @login_required

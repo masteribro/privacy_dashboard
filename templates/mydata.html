@@ -37,10 +37,9 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h3 class="card-title text-warning">
-                            {% set sensitive_count = organisations_data|map(attribute='categories')|map('keys')|join(',')|replace('health', '1')|replace('financial', '1')|replace('location', '1')|length %}
-                            {{ [sensitive_count, 1]|max }}
+                            {{ sensitive_count }}
                         </h3>
-                        <p class="card-text">Sensitive Categories</p>
+                        <p class="card-text">Sensitive Data Items</p>
                     </div>
                 </div>
             </div>
