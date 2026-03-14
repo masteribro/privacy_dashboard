@@ -12,6 +12,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'f7a9e3c1b2d5a8e4c6f1a3b9d2e5c8a17b4e6f8a2c9d1b3e5f7a8c0d2e4f6a8'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///privacy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JSON_SORT_KEYS'] = False
+app.config['SESSION_COOKIE_SECURE'] = False  # Allow over HTTP for localhost
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PREFERRED_URL_SCHEME'] = 'http'
 
 # Initialize database
 db.init_app(app)
@@ -660,5 +665,23 @@ with app.app_context():
 
 # ========== RUN THE APP ==========
 
+
+# ========== ERROR HANDLERS ==========
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Handle 403 Forbidden errors"""
+    return render_template('error.html', error='Access Denied', message='You do not have permission to access this resource.'), 403
+
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 Not Found errors"""
+    return render_template('error.html', error='Page Not Found', message='The page you are looking for does not exist.'), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    """Handle 500 Server errors"""
+    return render_template('error.html', error='Server Error', message='An unexpected error occurred. Please try again later.'), 500
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
