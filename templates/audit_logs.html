@@ -48,7 +48,11 @@
                         <div class="card text-center">
                             <div class="card-body">
                                 <h3 class="card-title text-warning">
-                                    {{ [log for log in logs][-1].timestamp.strftime('%d %b') if logs else 'N/A' }}
+                                    {% if logs %}
+                                        {{ logs|first|attr('timestamp')|string|truncate(6, True) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
                                 </h3>
                                 <p class="card-text">Last Activity</p>
                             </div>
@@ -80,7 +84,7 @@
                                             <small>
                                                 {{ log.timestamp.strftime('%d %b %Y<br>%H:%M:%S') | safe }}
                                                 <br>
-                                                <span class="text-muted">({{ ((log.timestamp.now() - log.timestamp).total_seconds() / 3600)|int }} hours ago)</span>
+                                                <span class="text-muted">(Recently)</span>
                                             </small>
                                         </td>
                                         <td>
