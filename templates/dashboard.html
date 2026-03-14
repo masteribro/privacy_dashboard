@@ -73,6 +73,27 @@
         </div>
     </div>
     
+    <!-- Empty State Message for New Users -->
+    {% if total_orgs == 0 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info border-0 shadow-sm" role="alert">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h4 class="alert-heading mb-2"><i class="fas fa-rocket"></i> Welcome to Your Privacy Dashboard!</h4>
+                        <p class="mb-0">You have a perfect privacy score (100%) because no data is being collected about you yet. Add sample organizations to explore all features.</p>
+                    </div>
+                    <form method="POST" action="{{ url_for('populate_sample_data') }}" class="d-inline">
+                        <button type="submit" class="btn btn-info btn-lg ms-3">
+                            <i class="fas fa-plus-circle"></i> Add Sample Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     <!-- Quick Actions -->
     <div class="row">
         <div class="col-12">
