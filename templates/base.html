@@ -42,6 +42,20 @@
                                 <i class="fas fa-check-circle"></i> Consents
                             </a>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="moreDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i> More
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('data_flow') }}"><i class="fas fa-sitemap"></i> Data Flow</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('data_requests') }}"><i class="fas fa-file-export"></i> Data Requests</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('ccpa_settings') }}"><i class="fas fa-ban"></i> CCPA Settings</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('audit_logs') }}"><i class="fas fa-history"></i> Audit Logs</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('privacy_policy') }}"><i class="fas fa-file-contract"></i> Privacy Policy</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('data_processing') }}"><i class="fas fa-cog"></i> Data Processing</a></li>
+                            </ul>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('logout') }}">
                                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -53,6 +67,16 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="legalDropdown" role="button" data-bs-toggle="dropdown">
+                                Legal
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('terms_of_service') }}">Terms of Service</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('data_processing') }}">Data Processing</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link btn btn-light text-primary" href="{{ url_for('quick_demo') }}">Try Demo</a>
@@ -83,10 +107,21 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light text-center text-muted py-3 mt-5">
+    <footer class="bg-light text-center text-muted py-4 mt-5 border-top">
         <div class="container">
-            <p class="mb-0">PrivacyFirst Dashboard - Undergraduate Project</p>
-            <small>Demonstration Version - All data is simulated</small>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p class="mb-1">PrivacyFirst Dashboard - Undergraduate Project</p>
+                    <small>Demonstration Version - All data is simulated</small>
+                </div>
+                <div class="col-md-6">
+                    <small>
+                        <a href="{{ url_for('privacy_policy') }}" class="text-muted text-decoration-none">Privacy Policy</a> •
+                        <a href="{{ url_for('terms_of_service') }}" class="text-muted text-decoration-none">Terms</a> •
+                        <a href="{{ url_for('data_processing') }}" class="text-muted text-decoration-none">Data Processing</a>
+                    </small>
+                </div>
+            </div>
         </div>
     </footer>
 

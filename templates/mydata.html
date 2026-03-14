@@ -12,47 +12,182 @@
     </div>
     
     {% if organisations_data %}
+        <!-- Data Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary">{{ organisations_data|length }}</h3>
+                        <p class="card-text">Connected Organisations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-success">
+                            {% set total_items = organisations_data|map(attribute='total_items')|sum %}
+                            {{ total_items }}
+                        </h3>
+                        <p class="card-text">Data Items</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-warning">
+                            {% set sensitive_count = organisations_data|map(attribute='categories')|map('keys')|join(',')|replace('health', '1')|replace('financial', '1')|replace('location', '1')|length %}
+                            {{ [sensitive_count, 1]|max }}
+                        </h3>
+                        <p class="card-text">Sensitive Categories</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-danger"><i class="fas fa-lock"></i></h3>
+                        <p class="card-text">Privacy Protected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend for Data Sensitivity -->
+        <div class="alert alert-light border mb-4">
+            <h6 class="mb-3"><i class="fas fa-info-circle"></i> Data Sensitivity Levels</h6>
+            <div class="row">
+                <div class="col-md-3">
+                    <span class="badge bg-danger">Financial</span>
+                    <small class="d-block text-muted">Bank accounts, payments</small>
+                </div>
+                <div class="col-md-3">
+                    <span class="badge bg-danger">Health</span>
+                    <small class="d-block text-muted">Medical information</small>
+                </div>
+                <div class="col-md-3">
+                    <span class="badge bg-warning">Location</span>
+                    <small class="d-block text-muted">Address, movement</small>
+                </div>
+                <div class="col-md-3">
+                    <span class="badge bg-info">Personal</span>
+                    <small class="d-block text-muted">Name, email, preferences</small>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             {% for org_data in organisations_data %}
                 <div class="col-12 mb-4">
                     <div class="card">
-                        <div class="card-header bg-white">
-                            <div class="d-flex align-items-center">
-                                <span class="display-6 me-2">{{ org_data.organisation.logo }}</span>
-                                <h4 class="mb-0">{{ org_data.organisation.name }}</h4>
-                                <span class="badge bg-success ms-3">{{ org_data.total_items }} items</span>
+                        <div class="card-header bg-white border-bottom">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <span class="display-6 me-3">{{ org_data.organisation.logo }}</span>
+                                    <div>
+                                        <h5 class="mb-0">{{ org_data.organisation.name }}</h5>
+                                        <small class="text-muted">{{ org_data.organisation.description }}</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary">{{ org_data.total_items }} items</span>
                             </div>
                         </div>
                         <div class="card-body">
+                            <!-- Data Sensitivity Visualization -->
+                            <div class="mb-4">
+                                <h6 class="mb-3"><i class="fas fa-chart-pie"></i> Data Categories</h6>
+                                <div class="row">
+                                    {% for category, items in org_data.categories.items() %}
+                                        {% set sensitivity = 'danger' if category in ['financial', 'health'] else ('warning' if category in ['location', 'address'] else 'info') %}
+                                        <div class="col-md-4 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-{{ sensitivity }} me-2" style="width: 60px;">
+                                                    {{ items|length }}
+                                                </span>
+                                                <span>
+                                                    <strong>{{ category|capitalize }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ items|length }} item{{ 's' if items|length > 1 else '' }}</small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Detailed Data Items -->
                             {% for category, items in org_data.categories.items() %}
-                                <h6 class="text-primary mt-3">
-                                    <i class="fas fa-tag"></i> {{ category|capitalize }}
-                                </h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Data Field</th>
-                                                <th>Value</th>
-                                                <th>Purpose</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in items %}
+                                {% set sensitivity = 'danger' if category in ['financial', 'health'] else ('warning' if category in ['location', 'address'] else 'info') %}
+                                <div class="mb-4">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h6 class="mb-0">
+                                            <span class="badge bg-{{ sensitivity }}">
+                                                {{ category|capitalize }}
+                                            </span>
+                                        </h6>
+                                        <small class="text-muted ms-2">({{ items|length }} item{{ 's' if items|length > 1 else '' }})</small>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead class="table-light">
                                                 <tr>
-                                                    <td>{{ item.name }}</td>
-                                                    <td><code>{{ item.value }}</code></td>
-                                                    <td><small class="text-muted">{{ item.purpose }}</small></td>
+                                                    <th style="width: 30%;">Field</th>
+                                                    <th style="width: 30%;">Value</th>
+                                                    <th style="width: 40%;">Purpose</th>
                                                 </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in items %}
+                                                    <tr>
+                                                        <td>
+                                                            <strong>{{ item.name }}</strong>
+                                                        </td>
+                                                        <td>
+                                                            <code class="text-break">{{ item.value }}</code>
+                                                        </td>
+                                                        <td>
+                                                            <small class="text-muted">{{ item.purpose }}</small>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             {% endfor %}
+
+                            <!-- Privacy Actions -->
+                            <div class="border-top pt-3">
+                                <h6 class="mb-2"><i class="fas fa-shield-alt"></i> Privacy Actions</h6>
+                                <a href="{{ url_for('consents') }}" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-check-circle"></i> Manage Consents
+                                </a>
+                                <a href="{{ url_for('request_data') }}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-file-export"></i> Request Full Data
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
+        </div>
+
+        <!-- Data Security Notice -->
+        <div class="card border-success mt-4">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="fas fa-shield-alt"></i> Data Security & Privacy</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>What you should know:</strong></p>
+                <ul class="mb-0">
+                    <li>This dashboard shows data aggregated from multiple organisations for your visibility</li>
+                    <li>You can request a complete copy of all your data at any time using Subject Access Requests</li>
+                    <li>You can withdraw your consents and manage your privacy preferences in the Consents page</li>
+                    <li>Your data is displayed for informational purposes only and remains under organisations' control</li>
+                    <li>For CCPA rights (opt-out of sales, sharing, etc.), visit CCPA Settings</li>
+                </ul>
+            </div>
         </div>
     {% else %}
         <div class="alert alert-info">

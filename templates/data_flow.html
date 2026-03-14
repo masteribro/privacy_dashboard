@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-sitemap"></i> Data Flow Visualization
+                <small class="text-muted fs-6">How your data flows through the ecosystem</small>
+            </h1>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <!-- Information Alert -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>How to read this:</strong>
+                The diagram below shows how your data flows between you, PrivacyFirst, and the organisations connected to your account.
+            </div>
+
+            <!-- Data Flow Diagram -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-diagram-project"></i> Your Data Ecosystem</h5>
+                </div>
+                <div class="card-body" style="overflow-x: auto;">
+                    <svg width="100%" height="500" viewBox="0 0 1200 500" style="min-width: 1000px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <!-- Title -->
+                        <text x="600" y="30" text-anchor="middle" font-size="20" font-weight="bold">Your Data Privacy Ecosystem</text>
+                        
+                        <!-- You (Center) -->
+                        <circle cx="600" cy="250" r="50" fill="#007bff" opacity="0.9"/>
+                        <text x="600" y="250" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="bold" fill="white">You</text>
+                        <text x="600" y="265" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="white">(User)</text>
+                        
+                        <!-- PrivacyFirst (Top) -->
+                        <rect x="500" y="80" width="200" height="80" rx="5" fill="#28a745" opacity="0.9"/>
+                        <text x="600" y="115" text-anchor="middle" font-size="12" font-weight="bold" fill="white">PrivacyFirst</text>
+                        <text x="600" y="135" text-anchor="middle" font-size="10" fill="white">Dashboard</text>
+                        <text x="600" y="150" text-anchor="middle" font-size="9" fill="white">(Data Aggregator)</text>
+                        
+                        <!-- Arrow from You to PrivacyFirst -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#666"/>
+                            </marker>
+                            <marker id="arrowhead-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#dc3545"/>
+                            </marker>
+                            <marker id="arrowhead-orange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#fd7e14"/>
+                            </marker>
+                        </defs>
+                        
+                        <line x1="600" y1="200" x2="600" y2="160" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+                        <text x="620" y="180" font-size="9" fill="#666">You control</text>
+                        <text x="620" y="190" font-size="9" fill="#666">your data</text>
+                        
+                        <!-- Organizations (Bottom Left, Bottom Center, Bottom Right) -->
+                        <!-- Bank -->
+                        <rect x="50" y="340" width="150" height="80" rx="5" fill="#ffc107" opacity="0.8"/>
+                        <text x="125" y="370" text-anchor="middle" font-size="12" font-weight="bold">Bank</text>
+                        <text x="125" y="385" text-anchor="middle" font-size="9">Financial Data</text>
+                        <text x="125" y="398" text-anchor="middle" font-size="8">(High Sensitivity)</text>
+                        
+                        <!-- Social Media -->
+                        <rect x="525" y="340" width="150" height="80" rx="5" fill="#17a2b8" opacity="0.8"/>
+                        <text x="600" y="370" text-anchor="middle" font-size="12" font-weight="bold">Social Media</text>
+                        <text x="600" y="385" text-anchor="middle" font-size="9">Behavioral Data</text>
+                        <text x="600" y="398" text-anchor="middle" font-size="8">(Medium Sensitivity)</text>
+                        
+                        <!-- E-Commerce -->
+                        <rect x="1000" y="340" width="150" height="80" rx="5" fill="#6f42c1" opacity="0.8"/>
+                        <text x="1075" y="370" text-anchor="middle" font-size="12" font-weight="bold">E-Commerce</text>
+                        <text x="1075" y="385" text-anchor="middle" font-size="9">Purchase History</text>
+                        <text x="1075" y="398" text-anchor="middle" font-size="8">(Medium Sensitivity)</text>
+                        
+                        <!-- Arrows from Organizations to PrivacyFirst -->
+                        <!-- Bank to PF -->
+                        <path d="M 125 340 Q 300 200 500 120" stroke="#ffc107" stroke-width="2" fill="none" marker-end="url(#arrowhead-orange)"/>
+                        <text x="250" y="220" font-size="8" fill="#666">Data pulled</text>
+                        
+                        <!-- Social to PF -->
+                        <path d="M 600 340 L 600 160" stroke="#17a2b8" stroke-width="2" fill="none" marker-end="url(#arrowhead-orange)"/>
+                        <text x="610" y="250" font-size="8" fill="#666">Data pulled</text>
+                        
+                        <!-- E-Commerce to PF -->
+                        <path d="M 1075 340 Q 900 200 700 120" stroke="#6f42c1" stroke-width="2" fill="none" marker-end="url(#arrowhead-orange)"/>
+                        <text x="900" y="220" font-size="8" fill="#666">Data pulled</text>
+                        
+                        <!-- Arrows from PrivacyFirst to You -->
+                        <line x1="560" y1="150" x2="630" y2="200" stroke="#28a745" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <text x="580" y="165" font-size="8" fill="#666">Data shown</text>
+                        <text x="580" y="175" font-size="8" fill="#666">to you</text>
+                    </svg>
+                </div>
+                <div class="card-footer bg-light text-muted">
+                    <small>
+                        <i class="fas fa-info-circle"></i>
+                        Diagram shows data flows. Arrows indicate data movement. Thickness indicates importance. Colors represent different data types.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Flow Details -->
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-arrow-down"></i> Data Coming IN (From Organizations)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-warning"><i class="fas fa-building"></i> From Organizations:</h6>
+                        <ul class="list-unstyled text-muted">
+                            <li class="mb-2">
+                                <strong>Personal Data</strong> - Name, email, phone, address
+                            </li>
+                            <li class="mb-2">
+                                <strong>Financial Data</strong> - Account details, transactions, balance
+                            </li>
+                            <li class="mb-2">
+                                <strong>Behavioral Data</strong> - Purchase history, browsing, preferences
+                            </li>
+                            <li class="mb-2">
+                                <strong>Health Data</strong> - Medical records, appointments, allergies
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-warning" style="font-size: 0.85rem;">
+                        <i class="fas fa-lock"></i>
+                        <strong>Security:</strong> All data flows are encrypted and use secure protocols
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-arrow-up"></i> Data Going OUT (Your Control)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-success"><i class="fas fa-user-check"></i> You Can:</h6>
+                        <ul class="list-unstyled text-muted">
+                            <li class="mb-2">
+                                <strong><i class="fas fa-eye"></i> View</strong> all data held about you
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="fas fa-download"></i> Export</strong> data in JSON/CSV format
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="fas fa-ban"></i> Opt-out</strong> of data sales (CCPA)
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="fas fa-times"></i> Withdraw</strong> consents at any time
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-success" style="font-size: 0.85rem;">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Your Rights:</strong> GDPR & CCPA protections apply
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Categories with Sensitivity -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-list"></i> Data Categories & Sensitivity Levels</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="border-start border-5 border-danger ps-3">
+                                <h6 class="mb-1">
+                                    <span class="badge bg-danger">HIGH</span> Sensitive Data
+                                </h6>
+                                <ul class="list-unstyled text-muted mb-0" style="font-size: 0.9rem;">
+                                    <li><i class="fas fa-heart"></i> Health/Medical</li>
+                                    <li><i class="fas fa-money-bill"></i> Financial/Banking</li>
+                                    <li><i class="fas fa-map-pin"></i> Location Data</li>
+                                    <li><i class="fas fa-dna"></i> Biometric Data</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="border-start border-5 border-warning ps-3">
+                                <h6 class="mb-1">
+                                    <span class="badge bg-warning text-dark">MEDIUM</span> Important Data
+                                </h6>
+                                <ul class="list-unstyled text-muted mb-0" style="font-size: 0.9rem;">
+                                    <li><i class="fas fa-user"></i> Identity (Name, DOB)</li>
+                                    <li><i class="fas fa-eye"></i> Behavioral/Preferences</li>
+                                    <li><i class="fas fa-phone"></i> Contact Information</li>
+                                    <li><i class="fas fa-briefcase"></i> Employment Info</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="border-start border-5 border-info ps-3">
+                                <h6 class="mb-1">
+                                    <span class="badge bg-info">LOW</span> General Data
+                                </h6>
+                                <ul class="list-unstyled text-muted mb-0" style="font-size: 0.9rem;">
+                                    <li><i class="fas fa-window"></i> Website Activity</li>
+                                    <li><i class="fas fa-cookie"></i> Cookie Data</li>
+                                    <li><i class="fas fa-clock"></i> Timestamps</li>
+                                    <li><i class="fas fa-language"></i> Language Preferences</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Recommendations -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Privacy Recommendations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success"></i> ✓ Do This:</h6>
+                            <ul class="text-muted" style="font-size: 0.9rem;">
+                                <li>Regularly review what data is collected about you</li>
+                                <li>Withdraw consents for services you don't use</li>
+                                <li>Exercise CCPA opt-out rights if you're a CA resident</li>
+                                <li>Download your data periodically for personal records</li>
+                                <li>Check audit logs for suspicious activity</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-times-circle text-danger"></i> Don't Do This:</h6>
+                            <ul class="text-muted" style="font-size: 0.9rem;">
+                                <li>Share your account credentials with anyone</li>
+                                <li>Enable data collection you don't understand</li>
+                                <li>Ignore privacy policy updates</li>
+                                <li>Use the same password on multiple services</li>
+                                <li>Assume all data collection is legitimate</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row mt-4 mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-link"></i> Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('mydata') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-database"></i> View My Data
+                    </a>
+                    <a href="{{ url_for('consents') }}" class="btn btn-outline-success me-2">
+                        <i class="fas fa-check-circle"></i> Manage Consents
+                    </a>
+                    <a href="{{ url_for('ccpa_settings') }}" class="btn btn-outline-warning me-2">
+                        <i class="fas fa-ban"></i> CCPA Settings
+                    </a>
+                    <a href="{{ url_for('audit_logs') }}" class="btn btn-outline-info">
+                        <i class="fas fa-history"></i> View Audit Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* SVG Styles */
+    svg text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    svg line {
+        stroke-linecap: round;
+    }
+    
+    svg path {
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+</style>
+{% endblock %}

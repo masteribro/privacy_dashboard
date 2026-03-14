@@ -53,9 +53,173 @@ code {
 .score-average { color: #ffc107; }
 .score-poor { color: #dc3545; }
 
+/* Content Sections */
+.content-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.content-section:last-child {
+    border-bottom: none;
+}
+
+.content-section h3 {
+    color: #0d6efd;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* Privacy Status Badges */
+.privacy-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Data Sensitivity Colors */
+.sensitivity-high {
+    border-left: 4px solid #dc3545;
+    background-color: #fff5f5;
+}
+
+.sensitivity-medium {
+    border-left: 4px solid #ffc107;
+    background-color: #fffbf0;
+}
+
+.sensitivity-low {
+    border-left: 4px solid #17a2b8;
+    background-color: #f0f8fa;
+}
+
+/* Enhanced Table Styling */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table thead th {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Badge Enhancements */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 2px solid #f8f9fa;
+}
+
+/* Form Styling */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Tab Styling */
+.nav-tabs .nav-link {
+    color: #495057;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent;
+    border-bottom-color: #0d6efd;
+    color: #0d6efd;
+}
+
+/* Card Header Styling */
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* List Styling */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Alert Enhancements */
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: #0d6efd;
+    background-color: #e7f1ff;
+    color: #004085;
+}
+
+.alert-success {
+    border-left-color: #198754;
+    background-color: #d1f2eb;
+    color: #155724;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Sticky Header in Tables */
+.sticky-top {
+    z-index: 10;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .display-1 {
         font-size: 4rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+    }
+    
+    .d-flex.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .badge {
+        margin-top: 0.5rem;
     }
 }
