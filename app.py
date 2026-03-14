@@ -810,4 +810,10 @@ def server_error(error):
     return render_template('error.html', error='Server Error', message='An unexpected error occurred. Please try again later.'), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    import os
+    port = int(os.environ.get('FLASK_PORT', 5001))
+    print(f"\n{'='*50}")
+    print(f"Privacy Dashboard Running!")
+    print(f"URL: http://localhost:{port}")
+    print(f"{'='*50}\n")
+    app.run(debug=True, host='0.0.0.0', port=port)
