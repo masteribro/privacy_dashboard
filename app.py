@@ -25,6 +25,78 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# ========== DATABASE AUTO-INITIALIZATION ==========
+with app.app_context():
+    # Create all tables if they don't exist
+    db.create_all()
+    
+    # Check if demo user exists, if not create it
+    demo_user = User.query.filter_by(username='demo').first()
+    if not demo_user:
+        print("[DB INIT] Creating demo user...")
+        demo_user = User(
+            username='demo',
+            email='demo@privacyfirst.local',
+            password=generate_password_hash('demo123')
+        )
+        db.session.add(demo_user)
+        db.session.flush()
+        
+        # Create sample organisations and data
+        orgs = [
+            Organisation(name='Tech Corp', description='Cloud storage and productivity platform', logo='☁️'),
+            Organisation(name='Social Networks Inc', description='Social media and communication platform', logo='👥'),
+            Organisation(name='E-Commerce Store', description='Online shopping and retail platform', logo='🛍️')
+        ]
+        for org in orgs:
+            db.session.add(org)
+        db.session.flush()
+        
+        # Create data sources and items
+        for i, org in enumerate(orgs, 1):
+            ds = DataSource(user_id=demo_user.id, organisation_id=org.id, status='active')
+            db.session.add(ds)
+            db.session.flush()
+            
+            # Sample data items
+            if i == 1:  # Tech Corp
+                items = [
+                    DataItem(data_source_id=ds.id, category='personal', name='Full Name', value='John Demo', purpose='Account identification'),
+                    DataItem(data_source_id=ds.id, category='personal', name='Email Address', value='demo@privacyfirst.local', purpose='Communication'),
+                    DataItem(data_source_id=ds.id, category='location', name='Last Login Location', value='Lagos, Nigeria', purpose='Security'),
+                ]
+            elif i == 2:  # Social Networks
+                items = [
+                    DataItem(data_source_id=ds.id, category='personal', name='Profile Name', value='Demo User', purpose='Profile display'),
+                    DataItem(data_source_id=ds.id, category='personal', name='Bio', value='Privacy-conscious user', purpose='Profile info'),
+                    DataItem(data_source_id=ds.id, category='location', name='Current City', value='Lagos', purpose='Location features'),
+                ]
+            else:  # E-Commerce
+                items = [
+                    DataItem(data_source_id=ds.id, category='personal', name='Shipping Address', value='123 Demo Street, Lagos', purpose='Order delivery'),
+                    DataItem(data_source_id=ds.id, category='financial', name='Account Type', value='Premium Member', purpose='Membership'),
+                    DataItem(data_source_id=ds.id, category='personal', name='Purchase History', value='15 purchases', purpose='Recommendations'),
+                ]
+            
+            for item in items:
+                db.session.add(item)
+        
+        # Create consents
+        consents = [
+            Consent(user_id=demo_user.id, organisation_id=1, purpose='Data processing', consent_type='gdpr', status='active'),
+            Consent(user_id=demo_user.id, organisation_id=2, purpose='Marketing emails', consent_type='gdpr', status='active'),
+            Consent(user_id=demo_user.id, organisation_id=3, purpose='Order fulfillment', consent_type='gdpr', status='active'),
+        ]
+        for consent in consents:
+            db.session.add(consent)
+        
+        # Create user preferences
+        prefs = UserPreference(user_id=demo_user.id, language='en', theme='light', newsletter=True)
+        db.session.add(prefs)
+        
+        db.session.commit()
+        print("[DB INIT] Demo data created successfully!")
+
 # ========== ALL FUNCTIONS DEFINED HERE ==========
 
 def create_sample_organisations():
@@ -478,29 +550,31 @@ def download_sar(request_id):
         headers={'Content-Disposition': f'attachment;filename=sar-{request_id}.json'}
     )
 
-# ========== CCPA ROUTES ==========
+# ========== PRIVACY PREFERENCE ROUTES ==========
 
-@app.route('/ccpa-settings')
+@app.route('/privacy-preferences')
 @login_required
-def ccpa_settings():
-    """CCPA Privacy Settings (California residents)"""
+def privacy_preferences():
+    """Privacy Preferences for data protection rights"""
     opt_outs = CCPAOptOut.query.filter_by(user_id=current_user.id).all()
     opt_out_types = {opt.opt_out_type for opt in opt_outs}
+    organisations = Organisation.query.all()
     
-    log_audit("view_ccpa_settings", "ccpa", details="Viewed CCPA settings")
+    log_audit("view_privacy_preferences", "privacy", details="Viewed privacy preferences")
     
-    return render_template('ccpa_settings.html', 
+    return render_template('privacy_preferences.html', 
                          opt_out_types=opt_out_types,
-                         all_opt_outs=opt_outs)
+                         all_opt_outs=opt_outs,
+                         organisations=organisations)
 
-@app.route('/ccpa-opt-out/<opt_type>', methods=['POST'])
+@app.route('/privacy-opt-out/<opt_type>', methods=['POST'])
 @login_required
-def ccpa_opt_out(opt_type):
-    """Opt out from data sales or sharing (CCPA)"""
-    valid_types = ['sale', 'sharing', 'targeted_advertising']
+def privacy_opt_out(opt_type):
+    """Opt out from data sharing or targeted advertising"""
+    valid_types = ['sharing', 'targeted_advertising']
     
     if opt_type not in valid_types:
-        return {'status': 'error', 'message': 'Invalid opt-out type'}, 400
+        return {'status': 'error', 'message': 'Invalid preference type'}, 400
     
     org_id = request.form.get('organisation_id')
     reason = request.form.get('reason', '')
@@ -522,28 +596,28 @@ def ccpa_opt_out(opt_type):
         db.session.add(opt_out)
         db.session.commit()
         
-        log_audit("ccpa_opt_out", "ccpa", org_id, f"Type: {opt_type}")
+        log_audit("privacy_opt_out", "privacy", org_id, f"Type: {opt_type}")
         flash(f'Successfully opted out from {opt_type}', 'success')
     else:
         flash('Already opted out from this', 'info')
     
-    return redirect(url_for('ccpa_settings'))
+    return redirect(url_for('privacy_preferences'))
 
-@app.route('/ccpa-opt-in/<int:opt_out_id>', methods=['POST'])
+@app.route('/privacy-opt-in/<int:opt_out_id>', methods=['POST'])
 @login_required
-def ccpa_opt_in(opt_out_id):
-    """Revoke CCPA opt-out and opt back in"""
+def privacy_opt_in(opt_out_id):
+    """Revoke privacy opt-out and opt back in"""
     opt_out = CCPAOptOut.query.get(opt_out_id)
     
     if opt_out and opt_out.user_id == current_user.id:
-        log_audit("ccpa_opt_in", "ccpa", opt_out.organisation_id, f"Type: {opt_out.opt_out_type}")
+        log_audit("privacy_opt_in", "privacy", opt_out.organisation_id, f"Type: {opt_out.opt_out_type}")
         db.session.delete(opt_out)
         db.session.commit()
         flash('You have opted back in', 'success')
     else:
-        flash('Opt-out record not found', 'danger')
+        flash('Preference not found', 'danger')
     
-    return redirect(url_for('ccpa_settings'))
+    return redirect(url_for('privacy_preferences'))
 
 # ========== AUDIT LOG ROUTES ==========
 

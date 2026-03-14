@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="d-flex align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-shield-alt"></i> Privacy Preferences
+                </h1>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Protect Your Privacy:</strong> 
+                These settings allow you to exercise your data protection rights including opting out of data sharing and controlling how your information is used.
+            </div>
+
+            <!-- Tabs for different preference types -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="prefs-tab" data-bs-toggle="tab" data-bs-target="#prefs-content" type="button">
+                        <i class="fas fa-sliders-h"></i> Preferences
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rights-tab" data-bs-toggle="tab" data-bs-target="#rights-content" type="button">
+                        <i class="fas fa-check"></i> Your Rights
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Preferences Tab -->
+                <div class="tab-pane fade show active" id="prefs-content" role="tabpanel">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Opt-out of Data Sharing -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0"><i class="fas fa-share-alt"></i> Opt-Out of Data Sharing</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>You can request that organisations do not share your personal data with third parties without your explicit consent.</p>
+                                    <p class="mb-3"><strong>Current Status:</strong> 
+                                        {% if 'sharing' in opt_out_types %}
+                                            <span class="badge bg-success">Opted Out</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Opted Out</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <!-- List of organisations -->
+                                    {% if organisations %}
+                                        <h6 class="mt-4">Manage sharing preferences by organisation:</h6>
+                                        <div class="list-group mt-3">
+                                            {% for org in organisations %}
+                                                <div class="list-group-item">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6 class="mb-1">{{ org.name }}</h6>
+                                                            <small class="text-muted">{{ org.description }}</small>
+                                                        </div>
+                                                        <form method="POST" class="d-inline">
+                                                            {% if 'sharing' not in opt_out_types %}
+                                                                <button type="submit" formaction="{{ url_for('privacy_opt_out', opt_type='sharing') }}" class="btn btn-sm btn-outline-danger" name="organisation_id" value="{{ org.id }}">
+                                                                    Opt Out
+                                                                </button>
+                                                            {% else %}
+                                                                <button type="submit" formaction="{{ url_for('privacy_opt_in', opt_out_id=1) }}" class="btn btn-sm btn-outline-success" disabled>
+                                                                    Opted Out
+                                                                </button>
+                                                            {% endif %}
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted mt-3">No organisations connected yet.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Opt-out of Targeted Advertising -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="fas fa-bullseye"></i> Opt-Out of Targeted Advertising</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>You can request to not receive personalized advertising based on your behavioral data or preferences.</p>
+                                    <p class="mb-3"><strong>Current Status:</strong> 
+                                        {% if 'targeted_advertising' in opt_out_types %}
+                                            <span class="badge bg-success">Opted Out</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Opted Out</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <form method="POST" action="{{ url_for('privacy_opt_out', opt_type='targeted_advertising') }}" class="mt-3">
+                                        <div class="form-group mb-3">
+                                            <label for="reason" class="form-label">Reason (optional):</label>
+                                            <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Tell us why you're opting out..."></textarea>
+                                        </div>
+                                        {% if 'targeted_advertising' not in opt_out_types %}
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="fas fa-check"></i> Opt Out Now
+                                            </button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-warning" disabled>
+                                                <i class="fas fa-check"></i> Already Opted Out
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Email Preferences -->
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-envelope"></i> Email & Communication Preferences</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Control what emails and communications you receive from us.</p>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="marketing" checked>
+                                        <label class="form-check-label" for="marketing">
+                                            Receive marketing and promotional emails
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                                        <label class="form-check-label" for="newsletter">
+                                            Subscribe to privacy and security newsletters
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="notifications" checked>
+                                        <label class="form-check-label" for="notifications">
+                                            Receive security and privacy notifications
+                                        </label>
+                                    </div>
+
+                                    <button class="btn btn-primary" onclick="alert('Email preferences saved!')">
+                                        <i class="fas fa-save"></i> Save Preferences
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="col-lg-4">
+                            <div class="card bg-light">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Privacy Tips</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6>Keep Your Data Safe:</h6>
+                                    <ul class="small">
+                                        <li>Regularly review who has access to your data</li>
+                                        <li>Use strong, unique passwords</li>
+                                        <li>Enable two-factor authentication where available</li>
+                                        <li>Read privacy policies before sharing data</li>
+                                        <li>Exercise your data subject rights annually</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rights Tab -->
+                <div class="tab-pane fade" id="rights-content" role="tabpanel">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h4 class="mb-4">Your Data Protection Rights</h4>
+
+                            <div class="accordion" id="rightsAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#right1">
+                                            <i class="fas fa-right-to-left"></i> Right of Access (Subject Access Request)
+                                        </button>
+                                    </h2>
+                                    <div id="right1" class="accordion-collapse collapse show" data-bs-parent="#rightsAccordion">
+                                        <div class="accordion-body">
+                                            <p>You have the right to obtain a copy of all your personal data held by organisations. <a href="{{ url_for('request_data') }}">Make a request here</a>.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#right2">
+                                            <i class="fas fa-trash"></i> Right to Erasure (Right to be Forgotten)
+                                        </button>
+                                    </h2>
+                                    <div id="right2" class="accordion-collapse collapse" data-bs-parent="#rightsAccordion">
+                                        <div class="accordion-body">
+                                            <p>You can request deletion of your personal data in certain circumstances. Contact organisations directly or use <a href="{{ url_for('data_requests') }}">Data Requests</a>.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#right3">
+                                            <i class="fas fa-hand-paper"></i> Right to Object
+                                        </button>
+                                    </h2>
+                                    <div id="right3" class="accordion-collapse collapse" data-bs-parent="#rightsAccordion">
+                                        <div class="accordion-body">
+                                            <p>You can object to certain processing of your data, including direct marketing and profiling. Use the preferences above to control this.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#right4">
+                                            <i class="fas fa-lock"></i> Right to Restrict Processing
+                                        </button>
+                                    </h2>
+                                    <div id="right4" class="accordion-collapse collapse" data-bs-parent="#rightsAccordion">
+                                        <div class="accordion-body">
+                                            <p>You can request that processing of your data be limited in certain situations. Contact organisations directly for this request.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#right5">
+                                            <i class="fas fa-redo"></i> Right to Withdraw Consent
+                                        </button>
+                                    </h2>
+                                    <div id="right5" class="accordion-collapse collapse" data-bs-parent="#rightsAccordion">
+                                        <div class="accordion-body">
+                                            <p>You can withdraw consent at any time. Go to <a href="{{ url_for('consents') }}">Manage Consents</a> to withdraw your consents.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning mt-4">
+                                <strong>Need help?</strong> If you have questions about your rights or need to make a formal request, contact our Data Protection Officer at <strong>dpo@privacyfirst.local</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
