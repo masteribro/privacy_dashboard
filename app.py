@@ -30,7 +30,7 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ========== DATABASE AUTO-INITIALIZATION ==========
+# Sample organisations and data initialization
 with app.app_context():
     # Create all tables if they don't exist
     db.create_all()
@@ -38,7 +38,7 @@ with app.app_context():
     # Check if demo user exists, if not create it
     demo_user = User.query.filter_by(username='demo').first()
     if not demo_user:
-        print("[DB INIT] Creating demo user...")
+        print("Demo user and sample data created successfully.")
         demo_user = User(
             username='demo',
             email='demo@privacyfirst.local',
@@ -99,10 +99,7 @@ with app.app_context():
         prefs = UserPreference(user_id=demo_user.id, language='en', theme='light', newsletter=True)
         db.session.add(prefs)
         
-        db.session.commit()
-        print("[DB INIT] Demo data created successfully!")
-
-# ========== ALL FUNCTIONS DEFINED HERE ==========
+    db.session.commit()
 
 def create_sample_organisations():
     """Add some sample companies to the database"""
@@ -117,9 +114,8 @@ def create_sample_organisations():
     
     for org in organisations:
         db.session.add(org)
-    
-    db.session.commit()
-    print("✅ Sample organisations created!")
+        
+        db.session.commit()
 
 def add_banking_data(data_source_id, user_id, org_id):
     """Add sample banking data"""
@@ -247,8 +243,6 @@ def create_sample_data_for_demo_user():
         
         db.session.commit()
         print("✅ Sample data created for demo user!")
-
-# ========== ROUTES ==========
 
 @app.route('/')
 def index():
