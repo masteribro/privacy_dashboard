@@ -550,13 +550,10 @@ def login():
         # Check if user exists AND password is correct
         if user and check_password_hash(user.password, password):
             # Password is correct!
-            
+
             # Log the user in
             login_user(user)
-            
-            # Log this action
-            log_audit("login", "user", user.id, "User logged in")
-            
+
             # Send user to dashboard
             return redirect(url_for('dashboard'))
         else:

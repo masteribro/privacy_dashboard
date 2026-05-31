@@ -4,12 +4,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import db, User, Organisation, DataSource, DataItem, Consent, CCPAOptOut, SubjectAccessRequest, AuditLog, UserPreference
 from datetime import datetime
 import json
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'f7a9e3c1b2d5a8e4c6f1a3b9d2e5c8a17b4e6f8a2c9d1b3e5f7a8c0d2e4f6a8'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-fallback-key-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///privacy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_SORT_KEYS'] = False
@@ -784,16 +785,6 @@ def terms_of_service():
 def data_processing():
     """Data Processing Information page"""
     return render_template('data_processing.html')
-
-# ========== DATABASE INITIALIZATION (NOW AT THE BOTTOM - AFTER ALL FUNCTIONS) ==========
-
-with app.app_context():
-    db.create_all()
-    
-    # Only add sample data if database is empty
-    if Organisation.query.count() == 0:
-        create_sample_organisations()
-        create_sample_data_for_demo_user()
 
 # ========== RUN THE APP ==========
 

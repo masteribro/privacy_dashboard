@@ -81,7 +81,7 @@ class SubjectAccessRequest(db.Model):
 # Audit Log Model - tracks all user actions
 class AuditLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     action = db.Column(db.String(100))  # view_data, export_data, withdraw_consent, etc
     resource_type = db.Column(db.String(50))  # organisation, consent, data_item, request
     resource_id = db.Column(db.Integer, nullable=True)

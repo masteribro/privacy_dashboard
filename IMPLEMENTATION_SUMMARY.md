@@ -29,10 +29,10 @@ This document summarizes all features implemented to complete the missing contra
 - `POST /request-data` - Submit a data request
 - `GET /download-sar/<request_id>` - Download exported data
 
-#### CCPA Settings
-- `GET /ccpa-settings` - View CCPA settings page
-- `POST /ccpa-opt-out/<opt_type>` - Opt out from data sales/sharing/targeted ads
-- `POST /ccpa-opt-in/<opt_out_id>` - Revoke CCPA opt-out
+#### Privacy Preferences
+- `GET /privacy-preferences` - View privacy preferences page
+- `POST /privacy-opt-out/<opt_type>` - Opt out from data sales/sharing/targeted ads
+- `POST /privacy-opt-in/<opt_out_id>` - Revoke privacy opt-out
 
 #### Audit Logging
 - `GET /audit-logs` - View audit trail (last 100 activities)
@@ -95,7 +95,7 @@ This document summarizes all features implemented to complete the missing contra
    - Data retention notice
 
 ### CCPA & Visualization
-7. **ccpa_settings.html** (278 lines)
+7. **privacy_preferences.html** (278 lines)
    - Tabbed interface for opt-outs and rights
    - Opt-out forms for:
      - Data sales
@@ -202,7 +202,7 @@ Consents
 More ↓
   - Data Flow
   - Data Requests (SAR)
-  - CCPA Settings
+  - Privacy Preferences
   - Audit Logs
   - Privacy Policy
   - Data Processing
@@ -348,7 +348,7 @@ ALTER TABLE consent ADD COLUMN consent_type VARCHAR(20) DEFAULT 'gdpr';
 - `templates/data_requests.html`
 - `templates/request_data.html`
 - `templates/audit_logs.html`
-- `templates/ccpa_settings.html`
+- `templates/privacy_preferences.html`
 - `templates/data_flow.html`
 
 ### Modified Files:
