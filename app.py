@@ -1,9 +1,22 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, Response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
+from flask_wtf.csrf import CSRFProtect
 from database import db, User, Organisation, DataSource, DataItem, Consent, CCPAOptOut, SubjectAccessRequest, AuditLog, UserPreference
 from datetime import datetime
 import json
+import os
+import bcrypt as bcrypt_lib
+
+
+def hash_password(password):
+    return bcrypt_lib.hashpw(password.encode('utf-8'), bcrypt_lib.gensalt(rounds=12)).decode('utf-8')
+
+
+def verify_password(password, stored_hash):
+    if stored_hash.startswith('$2b$') or stored_hash.startswith('$2a$'):
+        return bcrypt_lib.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+    return check_password_hash(stored_hash, password)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -20,6 +33,9 @@ app.config['PREFERRED_URL_SCHEME'] = 'http'
 
 # Initialize database
 db.init_app(app)
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
 
 # Initialize login manager
 login_manager = LoginManager()
@@ -42,7 +58,7 @@ with app.app_context():
         demo_user = User(
             username='demo',
             email='demo@privacyfirst.local',
-            password=generate_password_hash('demo123')
+            password=hash_password('demo123')
         )
         db.session.add(demo_user)
         db.session.flush()
@@ -207,7 +223,7 @@ def create_sample_data_for_demo_user():
         demo_user = User(
             username='demo',
             email='demo@example.com',
-            password=generate_password_hash('password123')
+            password=hash_password('password123')
         )
         db.session.add(demo_user)
         db.session.commit()
@@ -255,9 +271,12 @@ def login():
         password = request.form.get('password')
         
         user = User.query.filter_by(username=username).first()
-        
-        if user and check_password_hash(user.password, password):
+        if not user:
+            user = User.query.filter_by(email=username).first()
+
+        if user and verify_password(password, user.password):
             login_user(user)
+            log_audit("login", "user", user.id, "User logged in successfully")
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -284,8 +303,14 @@ def register():
             flash('Email already registered', 'danger')
             return redirect(url_for('register'))
         
+        # Check passwords match
+        confirm_password = request.form.get('confirm_password')
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return redirect(url_for('register'))
+
         # Create new user
-        hashed_password = generate_password_hash(password)
+        hashed_password = hash_password(password)
         new_user = User(username=username, email=email, password=hashed_password)
         
         db.session.add(new_user)
@@ -784,6 +809,21 @@ def terms_of_service():
 def data_processing():
     """Data Processing Information page"""
     return render_template('data_processing.html')
+
+# ========== SECURITY HEADERS ==========
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "style-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; "
+        "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+        "font-src 'self' https://cdnjs.cloudflare.com; "
+        "img-src 'self' data:;"
+    )
+    return response
 
 # ========== DATABASE INITIALIZATION (NOW AT THE BOTTOM - AFTER ALL FUNCTIONS) ==========
 

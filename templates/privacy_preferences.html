@@ -62,6 +62,7 @@
                                                             <small class="text-muted">{{ org.description }}</small>
                                                         </div>
                                                         <form method="POST" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                             {% if 'sharing' not in opt_out_types %}
                                                                 <button type="submit" formaction="{{ url_for('privacy_opt_out', opt_type='sharing') }}" class="btn btn-sm btn-outline-danger" name="organisation_id" value="{{ org.id }}">
                                                                     Opt Out
@@ -98,6 +99,7 @@
                                     </p>
 
                                     <form method="POST" action="{{ url_for('privacy_opt_out', opt_type='targeted_advertising') }}" class="mt-3">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <div class="form-group mb-3">
                                             <label for="reason" class="form-label">Reason (optional):</label>
                                             <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Tell us why you're opting out..."></textarea>
