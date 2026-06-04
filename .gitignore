@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+
+# Database
+instance/
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# Claude internal
+.claude/
