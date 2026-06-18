@@ -81,14 +81,11 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <h4 class="alert-heading mb-2"><i class="fas fa-rocket"></i> Welcome to Your Privacy Dashboard!</h4>
-                        <p class="mb-0">You have a perfect privacy score (100%) because no data is being collected about you yet. Add sample organizations to explore all features.</p>
+                        <p class="mb-0">Your privacy score is 100 because no organisations have your data yet. Go to <strong>My Data</strong> to start adding organisations and tracking your personal data.</p>
                     </div>
-                    <form method="POST" action="{{ url_for('populate_sample_data') }}" class="d-inline">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-info btn-lg ms-3">
-                            <i class="fas fa-plus-circle"></i> Add Sample Data
-                        </button>
-                    </form>
+                    <a href="{{ url_for('mydata') }}" class="btn btn-primary btn-lg ms-3">
+                        <i class="fas fa-plus-circle"></i> Add Organisation
+                    </a>
                 </div>
             </div>
         </div>

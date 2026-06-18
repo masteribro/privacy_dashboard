@@ -84,17 +84,17 @@ with app.app_context():
                 items = [
                     DataItem(data_source_id=ds.id, category='personal', name='Full Name', value='John Demo', purpose='Account identification'),
                     DataItem(data_source_id=ds.id, category='personal', name='Email Address', value='demo@privacyfirst.local', purpose='Communication'),
-                    DataItem(data_source_id=ds.id, category='location', name='Last Login Location', value='Lagos, Nigeria', purpose='Security'),
+                    DataItem(data_source_id=ds.id, category='location', name='Last Login Location', value='London, UK', purpose='Security'),
                 ]
             elif i == 2:  # Social Networks
                 items = [
                     DataItem(data_source_id=ds.id, category='personal', name='Profile Name', value='Demo User', purpose='Profile display'),
                     DataItem(data_source_id=ds.id, category='personal', name='Bio', value='Privacy-conscious user', purpose='Profile info'),
-                    DataItem(data_source_id=ds.id, category='location', name='Current City', value='Lagos', purpose='Location features'),
+                    DataItem(data_source_id=ds.id, category='location', name='Current City', value='London', purpose='Location features'),
                 ]
             else:  # E-Commerce
                 items = [
-                    DataItem(data_source_id=ds.id, category='personal', name='Shipping Address', value='123 Demo Street, Lagos', purpose='Order delivery'),
+                    DataItem(data_source_id=ds.id, category='personal', name='Shipping Address', value='123 Demo Street, London', purpose='Order delivery'),
                     DataItem(data_source_id=ds.id, category='financial', name='Account Type', value='Premium Member', purpose='Membership'),
                     DataItem(data_source_id=ds.id, category='personal', name='Purchase History', value='15 purchases', purpose='Recommendations'),
                 ]
@@ -328,138 +328,6 @@ def logout():
     flash('You have been logged out', 'info')
     return redirect(url_for('index'))
 
-@app.route('/populate-sample-data', methods=['POST'])
-@login_required
-def populate_sample_data():
-    """Populate sample organizations, data items, and consents for new users"""
-    try:
-        # Check if user already has data
-        existing_sources = DataSource.query.filter_by(user_id=current_user.id).count()
-        if existing_sources > 0:
-            flash('You already have data populated!', 'warning')
-            return redirect(url_for('dashboard'))
-        
-        # Create sample organizations
-        sample_orgs = [
-            {
-                'name': 'TechFlow Cloud',
-                'description': 'Cloud storage and productivity platform',
-                'logo': '☁️'
-            },
-            {
-                'name': 'ConnectSocial',
-                'description': 'Social media and messaging platform',
-                'logo': '👥'
-            },
-            {
-                'name': 'ShopHub Nigeria',
-                'description': 'E-commerce and online retail platform',
-                'logo': '🛍️'
-            }
-        ]
-        
-        created_orgs = []
-        for org_data in sample_orgs:
-            org = Organisation(
-                name=org_data['name'],
-                description=org_data['description'],
-                logo=org_data['logo']
-            )
-            db.session.add(org)
-            db.session.flush()
-            created_orgs.append(org)
-        
-        # Create data sources and sample data items
-        sample_data_by_org = {
-            0: [  # TechFlow Cloud
-                {'category': 'personal', 'name': 'Full Name', 'value': 'User Account', 'purpose': 'Account identification'},
-                {'category': 'personal', 'name': 'Email Address', 'value': 'user@example.com', 'purpose': 'Communication'},
-                {'category': 'location', 'name': 'Last Login Location', 'value': 'Lagos, Nigeria', 'purpose': 'Security'},
-                {'category': 'personal', 'name': 'Storage Usage', 'value': '2.5 GB', 'purpose': 'Service delivery'},
-            ],
-            1: [  # ConnectSocial
-                {'category': 'personal', 'name': 'Display Name', 'value': 'User Profile', 'purpose': 'Profile visibility'},
-                {'category': 'personal', 'name': 'Bio/About', 'value': 'Privacy-conscious user', 'purpose': 'Profile information'},
-                {'category': 'location', 'name': 'Current City', 'value': 'Lagos', 'purpose': 'Location features'},
-                {'category': 'personal', 'name': 'Friends List', 'value': '127 connections', 'purpose': 'Social networking'},
-            ],
-            2: [  # ShopHub Nigeria
-                {'category': 'personal', 'name': 'Delivery Address', 'value': 'Lagos, Nigeria', 'purpose': 'Order delivery'},
-                {'category': 'financial', 'name': 'Account Type', 'value': 'Premium Member', 'purpose': 'Membership status'},
-                {'category': 'personal', 'name': 'Purchase History', 'value': '5 recent orders', 'purpose': 'Recommendations'},
-                {'category': 'personal', 'name': 'Phone Number', 'value': '+234xxxxxxxxxx', 'purpose': 'Order communication'},
-            ]
-        }
-        
-        # Create data sources and items
-        for idx, org in enumerate(created_orgs):
-            ds = DataSource(
-                user_id=current_user.id,
-                organisation_id=org.id,
-                status='active'
-            )
-            db.session.add(ds)
-            db.session.flush()
-            
-            # Add data items
-            for item_data in sample_data_by_org.get(idx, []):
-                item = DataItem(
-                    data_source_id=ds.id,
-                    category=item_data['category'],
-                    name=item_data['name'],
-                    value=item_data['value'],
-                    purpose=item_data['purpose']
-                )
-                db.session.add(item)
-        
-        # Create sample consents
-        sample_consents = [
-            {
-                'org_id': created_orgs[0].id,
-                'purpose': 'Data processing and account management'
-            },
-            {
-                'org_id': created_orgs[1].id,
-                'purpose': 'Marketing emails and personalized content'
-            },
-            {
-                'org_id': created_orgs[2].id,
-                'purpose': 'Order fulfillment and delivery'
-            }
-        ]
-        
-        for consent_data in sample_consents:
-            consent = Consent(
-                user_id=current_user.id,
-                organisation_id=consent_data['org_id'],
-                purpose=consent_data['purpose'],
-                consent_type='gdpr',
-                status='active'
-            )
-            db.session.add(consent)
-        
-        # Create user preferences if not exist
-        existing_prefs = UserPreference.query.filter_by(user_id=current_user.id).first()
-        if not existing_prefs:
-            prefs = UserPreference(
-                user_id=current_user.id,
-                language='en',
-                theme='light',
-                newsletter=True
-            )
-            db.session.add(prefs)
-        
-        db.session.commit()
-        
-        log_audit("populate_sample_data", "user", current_user.id, "Added sample data for new user")
-        flash('Sample data added successfully! Explore your privacy dashboard.', 'success')
-        return redirect(url_for('dashboard'))
-        
-    except Exception as e:
-        db.session.rollback()
-        log_audit("populate_sample_data", "user", current_user.id, f"Error: {str(e)}", "failed")
-        flash(f'Error adding sample data: {str(e)}', 'danger')
-        return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
 @login_required

@@ -78,17 +78,17 @@ def reset_database():
                 items = [
                     DataItem(data_source_id=ds.id, category='personal', name='Full Name', value='John Demo', purpose='Account identification'),
                     DataItem(data_source_id=ds.id, category='personal', name='Email Address', value='demo@privacyfirst.local', purpose='Communication'),
-                    DataItem(data_source_id=ds.id, category='location', name='Last Login Location', value='Lagos, Nigeria', purpose='Security'),
+                    DataItem(data_source_id=ds.id, category='location', name='Last Login Location', value='London, UK', purpose='Security'),
                 ]
             elif i == 2:  # Social Networks
                 items = [
                     DataItem(data_source_id=ds.id, category='personal', name='Profile Name', value='Demo User', purpose='Profile display'),
                     DataItem(data_source_id=ds.id, category='personal', name='Bio', value='Privacy-conscious user', purpose='Profile info'),
-                    DataItem(data_source_id=ds.id, category='location', name='Current City', value='Lagos', purpose='Location features'),
+                    DataItem(data_source_id=ds.id, category='location', name='Current City', value='London', purpose='Location features'),
                 ]
             else:  # E-Commerce
                 items = [
-                    DataItem(data_source_id=ds.id, category='personal', name='Shipping Address', value='123 Demo Street, Lagos', purpose='Order delivery'),
+                    DataItem(data_source_id=ds.id, category='personal', name='Shipping Address', value='123 Demo Street, London', purpose='Order delivery'),
                     DataItem(data_source_id=ds.id, category='financial', name='Account Type', value='Premium Member', purpose='Membership'),
                     DataItem(data_source_id=ds.id, category='personal', name='Purchase History', value='15 purchases', purpose='Recommendations'),
                 ]
