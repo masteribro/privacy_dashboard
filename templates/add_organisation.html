@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <h1 class="mb-4"><i class="fas fa-plus-circle"></i> Add Organisation</h1>
+
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Enter the details of a real organisation that holds your personal data — for example Google, Amazon, your bank, or your employer.
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Organisation Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name"
+                                placeholder="e.g. Google, Amazon, MTN Nigeria" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" name="description"
+                                placeholder="e.g. Email and cloud storage provider">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Icon (emoji)</label>
+                            <input type="text" class="form-control" name="logo"
+                                placeholder="e.g. 🌐 🏦 📱" maxlength="5">
+                            <small class="text-muted">Paste one emoji to represent this organisation</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">What did you consent to? <span class="text-muted">(optional)</span></label>
+                            <input type="text" class="form-control" name="consent_purpose"
+                                placeholder="e.g. Marketing emails, Account management">
+                            <small class="text-muted">This will be recorded as your active consent for this organisation</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right"></i> Add & Continue to Data Items
+                            </button>
+                            <a href="{{ url_for('mydata') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

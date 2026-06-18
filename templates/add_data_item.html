@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex align-items-center mb-4">
+                <span class="display-5 me-3">{{ org.logo }}</span>
+                <div>
+                    <h1 class="mb-0">{{ org.name }}</h1>
+                    <small class="text-muted">Add data items this organisation holds about you</small>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus"></i> Add Data Item</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i>
+                        Think about what data this organisation has about you — your name, email, phone, address, purchase history, etc.
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" name="category" required>
+                                <option value="">Select category...</option>
+                                <option value="personal">Personal (name, email, phone)</option>
+                                <option value="financial">Financial (bank account, payment)</option>
+                                <option value="location">Location (address, city)</option>
+                                <option value="health">Health (medical info)</option>
+                                <option value="behavioural">Behavioural (activity, history)</option>
+                                <option value="preference">Preference (interests, settings)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Data Field Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name"
+                                placeholder="e.g. Email Address, Phone Number, Home Address" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Value <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="value"
+                                placeholder="e.g. john@gmail.com, +234 800 000 0000" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Purpose <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="purpose"
+                                placeholder="e.g. Account login, Order delivery, Marketing" required>
+                            <small class="text-muted">Why does this organisation hold this data?</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                            <a href="{{ url_for('mydata') }}" class="btn btn-success">
+                                <i class="fas fa-check"></i> Done — View My Data
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if existing_items %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Items Added ({{ existing_items|length }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Category</th>
+                                <th>Field</th>
+                                <th>Value</th>
+                                <th>Purpose</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in existing_items %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ item.category }}</span></td>
+                                <td>{{ item.name }}</td>
+                                <td><code>{{ item.value }}</code></td>
+                                <td><small class="text-muted">{{ item.purpose }}</small></td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('delete_data_item', item_id=item.id) }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Delete this item?')">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

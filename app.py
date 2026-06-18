@@ -480,15 +480,18 @@ def dashboard():
         data_items_count += DataItem.query.filter_by(data_source_id=ds.id).count()
     
     # Calculate health score
-    health_score = 70
-    if total_consents > 0:
-        consent_ratio = active_consents / total_consents
-        health_score += int((0.5 - consent_ratio) * 20)
-    
-    if total_orgs > 5:
-        health_score -= (total_orgs - 5) * 2
-    
-    health_score = max(0, min(100, health_score))
+    if total_orgs == 0:
+        health_score = 100
+    else:
+        health_score = 70
+        if total_consents > 0:
+            consent_ratio = active_consents / total_consents
+            health_score += int((0.5 - consent_ratio) * 20)
+
+        if total_orgs > 5:
+            health_score -= (total_orgs - 5) * 2
+
+        health_score = max(0, min(100, health_score))
     
     return render_template('dashboard.html', 
                           user=current_user,
@@ -809,6 +812,137 @@ def terms_of_service():
 def data_processing():
     """Data Processing Information page"""
     return render_template('data_processing.html')
+
+# ========== REAL DATA MANAGEMENT ROUTES ==========
+
+@app.route('/add-organisation', methods=['GET', 'POST'])
+@login_required
+def add_organisation():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        logo = request.form.get('logo', '').strip() or '🏢'
+        consent_purpose = request.form.get('consent_purpose', '').strip()
+
+        if not name:
+            flash('Organisation name is required', 'danger')
+            return redirect(url_for('add_organisation'))
+
+        # Check if user is already connected to an org with this name
+        existing_org = Organisation.query.filter_by(name=name).first()
+        if existing_org:
+            already_connected = DataSource.query.filter_by(
+                user_id=current_user.id,
+                organisation_id=existing_org.id,
+                status='active'
+            ).first()
+            if already_connected:
+                flash(f'You are already connected to {name}', 'warning')
+                return redirect(url_for('mydata'))
+            org = existing_org
+        else:
+            org = Organisation(name=name, description=description, logo=logo)
+            db.session.add(org)
+            db.session.flush()
+
+        ds = DataSource(user_id=current_user.id, organisation_id=org.id, status='active')
+        db.session.add(ds)
+
+        if consent_purpose:
+            consent = Consent(
+                user_id=current_user.id,
+                organisation_id=org.id,
+                purpose=consent_purpose,
+                consent_type='gdpr',
+                status='active'
+            )
+            db.session.add(consent)
+
+        db.session.commit()
+        log_audit("add_organisation", "organisation", org.id, f"Added organisation: {name}")
+        flash(f'{name} added! Now add the data items they hold about you.', 'success')
+        return redirect(url_for('add_data_item', org_id=org.id))
+
+    return render_template('add_organisation.html')
+
+
+@app.route('/add-data-item/<int:org_id>', methods=['GET', 'POST'])
+@login_required
+def add_data_item(org_id):
+    ds = DataSource.query.filter_by(user_id=current_user.id, organisation_id=org_id, status='active').first()
+    if not ds:
+        flash('Organisation not found', 'danger')
+        return redirect(url_for('mydata'))
+
+    org = Organisation.query.get(org_id)
+
+    if request.method == 'POST':
+        category = request.form.get('category', '').strip()
+        name = request.form.get('name', '').strip()
+        value = request.form.get('value', '').strip()
+        purpose = request.form.get('purpose', '').strip()
+
+        if not all([category, name, value, purpose]):
+            flash('All fields are required', 'danger')
+            return redirect(url_for('add_data_item', org_id=org_id))
+
+        item = DataItem(
+            data_source_id=ds.id,
+            category=category,
+            name=name,
+            value=value,
+            purpose=purpose
+        )
+        db.session.add(item)
+        db.session.commit()
+        log_audit("add_data_item", "data_item", item.id, f"Added {name} for {org.name}")
+        flash(f'"{name}" added to {org.name}', 'success')
+        return redirect(url_for('add_data_item', org_id=org_id))
+
+    existing_items = DataItem.query.filter_by(data_source_id=ds.id).all()
+    return render_template('add_data_item.html', org=org, existing_items=existing_items)
+
+
+@app.route('/delete-data-item/<int:item_id>', methods=['POST'])
+@login_required
+def delete_data_item(item_id):
+    item = DataItem.query.get(item_id)
+    if not item:
+        flash('Data item not found', 'danger')
+        return redirect(url_for('mydata'))
+
+    ds = DataSource.query.get(item.data_source_id)
+    if not ds or ds.user_id != current_user.id:
+        flash('Access denied', 'danger')
+        return redirect(url_for('mydata'))
+
+    item_name = item.name
+    log_audit("delete_data_item", "data_item", item_id, f"Deleted {item_name}")
+    db.session.delete(item)
+    db.session.commit()
+    flash(f'"{item_name}" deleted', 'success')
+    return redirect(request.referrer or url_for('mydata'))
+
+
+@app.route('/remove-organisation/<int:org_id>', methods=['POST'])
+@login_required
+def remove_organisation(org_id):
+    ds = DataSource.query.filter_by(user_id=current_user.id, organisation_id=org_id, status='active').first()
+    if not ds:
+        flash('Organisation not found', 'danger')
+        return redirect(url_for('mydata'))
+
+    org = Organisation.query.get(org_id)
+    org_name = org.name if org else 'Organisation'
+
+    DataItem.query.filter_by(data_source_id=ds.id).delete()
+    db.session.delete(ds)
+    db.session.commit()
+
+    log_audit("remove_organisation", "organisation", org_id, f"Removed {org_name}")
+    flash(f'{org_name} removed from your dashboard', 'success')
+    return redirect(url_for('mydata'))
+
 
 # ========== SECURITY HEADERS ==========
 
